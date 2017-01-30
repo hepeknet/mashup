@@ -3,7 +3,6 @@ package com.test.mashup;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -39,6 +38,7 @@ public class SimpleNativeJsonParser implements JsonParser {
 		if (log.isLoggable(Level.FINE)) {
 			log.fine("Will try to parse " + source + " as JSON");
 		}
+		// provided as part of standard JDK as of 1.8 update 60
 		final String script = "Java.asJSONCompatible(" + source + ")";
 		Map<String, Object> result = null;
 		try {
@@ -55,13 +55,8 @@ public class SimpleNativeJsonParser implements JsonParser {
 
 	@Override
 	public Map<String, Object> parse(InputStream is) {
-		if(is == null){
-			throw new IllegalArgumentException("Input stream must not be null");
-		}
-		try(Scanner sc = new Scanner(is, "UTF-8")){
-			final String page = sc.useDelimiter("\\A").next();
-			return parse(page);
-		}
+		final String text = StringUtil.inputStreamToString(is);
+		return parse(text);
 	}
 
 }

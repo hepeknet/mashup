@@ -6,9 +6,10 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.test.mashup.github.GithubProjectFinder;
 
 public class Main {
 	
@@ -18,53 +19,40 @@ public class Main {
 	static String secret = "Fnu5zuaZCo7yh2dSqKRh2WhQAz0HtHrkq9kpIjKp3ZE6SqKaMp";
 
 	private static final Logger LOG = Logger.getLogger(Main.class.getName());
+	
+	private static GithubProjectFinder githubFinder = new GithubProjectFinder();
 
 	public static void main(String[] args) throws Exception {
-		//parse();
-		final String post = "https://api.twitter.com/oauth2/token";
-		final String bearer = getCredentials(post);
-		System.out.println("Bearer is " + bearer);
-		executeHTTP("https://api.twitter.com/1.1/search/tweets.json?q=ReactiveX", bearer);
+		githubFinder.findProjects("Reactive", 10, "stars").forEach(p -> System.out.println(p));
+		//final String post = "https://api.twitter.com/oauth2/token";
+		//final String bearer = getCredentials(post);
+		//System.out.println("Bearer is " + bearer);
+		//searchTwitter("ReactiveX", bearer);
 	}
 
-	public static void parse() throws Exception {
-		final URL url = new URL("https://api.github.com/search/repositories?q=reactive&sort=stars");
-		final String page = new Scanner(url.openStream(), "UTF-8").useDelimiter("\\A").next();
-		System.out.println(page);
-		final Map contents = parser.parse(page);
-		final Object o = contents.get("items");
-		System.out.println(o);
-		final Object[] res = (Object[]) o;
-		for(final Object r : res){
-			System.out.println(r);
-		}
-		// final Object obj = se.eval("var obj = " + page + ";");
-		// System.out.println(obj);
-	}
-
-	public static void executeHTTP(String urlStr, String bearer) throws Exception {
-		LOG.log(Level.INFO, urlStr);
-		final URL url = new URL(urlStr);
+	public static void searchTwitter(String keyword, String bearer) throws Exception {
+		final String twitterURL = "https://api.twitter.com/1.1/search/tweets.json?q=" + keyword;
+		LOG.log(Level.INFO, twitterURL);
+		final URL url = new URL(twitterURL);
 		final HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 		httpCon.setDoOutput(true);
 		httpCon.setDoInput(true);
 		httpCon.setRequestMethod("GET");
-		final String base64 = Base64.getEncoder().encodeToString(bearer.getBytes());
 		httpCon.setRequestProperty("Authorization", "Bearer " + bearer);
 		httpCon.connect();
 		try {
-			final String page = new Scanner(url.openStream(), "UTF-8").useDelimiter("\\A").next();
+			final String page = StringUtil.inputStreamToString(url.openStream());
 			System.out.println(page);
 		} catch (final Exception exc) {
 			final String message = httpCon.getResponseMessage();
 			System.out.println(message);
 			if (httpCon.getErrorStream() != null) {
-				final String err = new Scanner(httpCon.getErrorStream(), "UTF-8").useDelimiter("\\A").next();
+				final String err = StringUtil.inputStreamToString(httpCon.getErrorStream());
 				System.out.println("Det: " + err);
 			}
 		}
 		if (httpCon.getInputStream() != null) {
-			final String body = new Scanner(httpCon.getInputStream(), "UTF-8").useDelimiter("\\A").next();
+			final String body = StringUtil.inputStreamToString(httpCon.getInputStream());
 			System.out.println("IS : " + body);
 		}
 	}
@@ -96,12 +84,12 @@ public class Main {
 			exc.printStackTrace();
 			
 			if (httpCon.getErrorStream() != null) {
-				final String err = new Scanner(httpCon.getErrorStream(), "UTF-8").useDelimiter("\\A").next();
+				final String err = StringUtil.inputStreamToString(httpCon.getErrorStream());
 				System.out.println("Det: " + err);
 			}
 		}
 		if (httpCon.getInputStream() != null) {
-			final String body = new Scanner(httpCon.getInputStream(), "UTF-8").useDelimiter("\\A").next();
+			final String body = StringUtil.inputStreamToString(httpCon.getInputStream());
 			System.out.println("IS : " + body);
 			final Map<String, Object> parsed = parser.parse(body);
 			System.out.println(parsed);
