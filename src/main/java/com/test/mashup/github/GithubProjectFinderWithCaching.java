@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.test.mashup.DependenciesFactory;
+import com.test.mashup.metrics.Counter;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 import com.test.mashup.util.ExpiringCache;
@@ -19,7 +20,12 @@ public class GithubProjectFinderWithCaching extends GithubProjectFinder {
 
 	private final int itemExpirationSeconds = ConfigurationUtil
 			.getInt(Constants.GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME);
+
 	private final ExpiringCache<List<GithubProject>> cache = DependenciesFactory.createCache();
+
+	private final Counter cacheHitCounter = DependenciesFactory.createMetrics().getCounter("GithubProjectsCacheHits");
+	private final Counter cacheMissCounter = DependenciesFactory.createMetrics()
+			.getCounter("GithubProjectsCacheMisses");
 
 	@Override
 	public List<GithubProject> findProjects(String keyword, int limit, String orderByField) {
@@ -33,9 +39,11 @@ public class GithubProjectFinderWithCaching extends GithubProjectFinder {
 		final String searchUrl = buildUrl(keyword, limitOutput, orderByField);
 		final List<GithubProject> cachedResult = cache.get(searchUrl);
 		if (cachedResult != null) {
-			log.fine("Found cached value for github project search " + searchUrl);
+			log.info("Found cached value for github project search " + searchUrl);
+			cacheHitCounter.inc();
 			return cachedResult;
 		} else {
+			cacheMissCounter.inc();
 			final List<GithubProject> result = super.findProjects(keyword, limitOutput, orderByField);
 			cache.put(searchUrl, result, itemExpirationSeconds, TimeUnit.SECONDS);
 			log.fine("Cached found projects for search url " + searchUrl + " and will keep them there for "

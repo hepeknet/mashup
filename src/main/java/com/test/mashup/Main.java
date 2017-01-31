@@ -10,6 +10,14 @@ import com.test.mashup.json.JsonParser;
 import com.test.mashup.twitter.Tweet;
 import com.test.mashup.twitter.TweetFinder;
 
+/**
+ * Main entry point into application. Ideally this should be replaced with some
+ * kind of REST endpoint (Jetty, Spring boot...) if this is to be exposed as
+ * some kind of microservice.
+ * 
+ * @author borisa
+ *
+ */
 public class Main {
 
 	private static final Logger LOG = Logger.getLogger(Main.class.getName());
@@ -29,6 +37,8 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws Exception {
+		doExecute("reactive");
+		doExecute("reactive");
 		doExecute("reactive");
 	}
 

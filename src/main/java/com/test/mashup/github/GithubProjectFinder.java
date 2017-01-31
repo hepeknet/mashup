@@ -11,6 +11,8 @@ import java.util.logging.Logger;
 
 import com.test.mashup.DependenciesFactory;
 import com.test.mashup.json.JsonParser;
+import com.test.mashup.metrics.Counter;
+import com.test.mashup.metrics.Histogram;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 
@@ -32,6 +34,12 @@ public class GithubProjectFinder {
 	 * implementation for JSON parsing
 	 */
 	private final JsonParser parser = DependenciesFactory.createParser();
+
+	private final Histogram searchStatistics = DependenciesFactory.createMetrics()
+			.getHistogram("GithubProjectSearchTimeStats");
+
+	private final Counter githubSearchFailures = DependenciesFactory.createMetrics()
+			.getCounter("GithubProjectSearchFailures");
 
 	/*
 	 * Configuration properties
@@ -88,6 +96,7 @@ public class GithubProjectFinder {
 		// make sure limit is within acceptable range
 		final List<GithubProject> results = new ArrayList<GithubProject>(limitOutput);
 		try {
+			final long startTime = System.currentTimeMillis();
 			final Map<String, Object> searchResultsParsed = parser.parse(new URL(searchUrl).openStream());
 			if (log.isLoggable(Level.FINE)) {
 				log.fine("Parsed search results are " + searchResultsParsed);
@@ -112,16 +121,21 @@ public class GithubProjectFinder {
 							break;
 						}
 					}
+					final long totalTimeMs = System.currentTimeMillis() - startTime;
+					searchStatistics.update(totalTimeMs);
 				} else {
+					githubSearchFailures.inc();
 					log.severe("Was not able to find field [items] in parsed search results. Did GitHub API change?");
 				}
 			} else {
+				githubSearchFailures.inc();
 				log.severe("Was not able to parse search results when accessing " + searchUrl
 						+ ". Check log for more details!");
 			}
 		} catch (final MalformedURLException mue) {
 			throw new IllegalStateException("Malformed URL for github project search [" + searchUrl + "]", mue);
 		} catch (final IOException ie) {
+			githubSearchFailures.inc();
 			throw new IllegalStateException("IO exception while searching for projects on " + searchUrl, ie);
 		}
 		if (log.isLoggable(Level.FINE)) {

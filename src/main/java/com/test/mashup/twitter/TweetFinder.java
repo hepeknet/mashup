@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 
 import com.test.mashup.DependenciesFactory;
 import com.test.mashup.json.JsonParser;
+import com.test.mashup.metrics.Counter;
+import com.test.mashup.metrics.Histogram;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 import com.test.mashup.util.StringUtil;
@@ -48,6 +50,9 @@ public class TweetFinder {
 
 	private final JsonParser parser = DependenciesFactory.createParser();
 
+	private final Histogram tweetSearchStats = DependenciesFactory.createMetrics().getHistogram("TwitterSearchStats");
+	private final Counter tweetSearchFailures = DependenciesFactory.createMetrics().getCounter("TwitterSearchFailures");
+
 	/*
 	 * We can cache bearer once we obtain it. It is valid until it is
 	 * invalidated manually. We detect that in our code and try to obtain it
@@ -55,7 +60,7 @@ public class TweetFinder {
 	 */
 	private volatile String cachedBearer = null;
 
-	private InputStream tryToGetTweets(String keyword) throws IOException {
+	private InputStream tryToGetTweets(String keyword, boolean shouldRetry) throws IOException {
 		final String searchUrl = baseSearchUrl + keyword + "&count=" + maxTweetsPerSearch;
 		log.info("Tweet search url is " + searchUrl);
 		/*
@@ -80,6 +85,9 @@ public class TweetFinder {
 			if (httpCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
 				log.info("Got unauthorized response when searching for tweets. Will try to obtain bearer again!");
 				cachedBearer = null;
+				if (shouldRetry) {
+					return tryToGetTweets(keyword, false);
+				}
 			}
 		} catch (final IOException exc) {
 			handleHttpConnectionError(httpCon, "twitter search for [" + keyword + "]");
@@ -92,7 +100,9 @@ public class TweetFinder {
 			throw new IllegalArgumentException("Keyword must not be null");
 		}
 		try {
-			final InputStream is = tryToGetTweets(keyword);
+			final long start = System.currentTimeMillis();
+			final boolean shouldRetryGettingBearerInCaseOfFailure = true;
+			final InputStream is = tryToGetTweets(keyword, shouldRetryGettingBearerInCaseOfFailure);
 			if (is != null) {
 				final String responseBody = StringUtil.inputStreamToString(is);
 				if (log.isLoggable(Level.FINE)) {
@@ -116,15 +126,20 @@ public class TweetFinder {
 						final Tweet tweet = new Tweet(idStr, text, userName, rtCount);
 						tweets.add(tweet);
 					}
+					final long totalMs = System.currentTimeMillis() - start;
+					tweetSearchStats.update(totalMs);
 					return tweets;
 				} else {
+					tweetSearchFailures.inc();
 					throw new IllegalStateException(
 							"Did not find [statuses] in twitter response. Possibly API change?");
 				}
 			} else {
+				tweetSearchFailures.inc();
 				throw new IllegalStateException("Did not find any body when searching twitter for [" + keyword + "]");
 			}
 		} catch (final IOException ie) {
+			tweetSearchFailures.inc();
 			throw new IllegalStateException("IOException while searching twitter for [" + keyword + "]", ie);
 		}
 	}

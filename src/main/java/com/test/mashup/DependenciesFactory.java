@@ -4,6 +4,8 @@ import com.test.mashup.github.GithubProjectFinder;
 import com.test.mashup.github.GithubProjectFinderWithCaching;
 import com.test.mashup.json.JsonParser;
 import com.test.mashup.json.SimpleNativeJsonParser;
+import com.test.mashup.metrics.Metrics;
+import com.test.mashup.metrics.NoOpMetricsImplementation;
 import com.test.mashup.twitter.TweetFinder;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
@@ -48,6 +50,10 @@ public abstract class DependenciesFactory {
 
 	public static <T> ExpiringCache<T> createCache() {
 		return new LocalNaiveExpiringCache<T>();
+	}
+
+	public static Metrics createMetrics() {
+		return new NoOpMetricsImplementation();
 	}
 
 }
