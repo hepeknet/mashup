@@ -1,0 +1,47 @@
+package com.test.mashup.util;
+
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Cache with expiration.
+ * 
+ * Ideally we would use some kind of 3PP cache like EHCache, Guava, Infinispan
+ * or Hazelcast. But since we are not allowed to use 3PP we create our own
+ * interface and simple implementation. This allows us to later swap to better
+ * implementation without disrupting our code too much.
+ * 
+ * Implementations of this cache are thread safe.
+ * 
+ * @author borisa
+ *
+ */
+public interface ExpiringCache {
+
+	/**
+	 * Caches value and associates expiration period with it.
+	 * 
+	 * @param key
+	 *            under which to remember cached value. Must not be null or
+	 *            empty string.
+	 * @param value
+	 *            the value to cache
+	 * @param expiration
+	 *            after what period cached value will be removed from cache. If
+	 *            this value is <=0 then value will not be cached
+	 * @param unit
+	 *            then unit of time used for expiration. Must not be null.
+	 */
+	void put(String key, Object value, long expiration, TimeUnit unit);
+
+	/**
+	 * Returns the value associated with given key.
+	 * 
+	 * @param key
+	 *            under which value has been cached. Must not be null or empty
+	 *            string.
+	 * @return the associated value or null in case value expired or never was
+	 *         cached at all.
+	 */
+	Object get(String key);
+
+}

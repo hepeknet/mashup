@@ -1,4 +1,4 @@
-package com.test.mashup;
+package com.test.mashup.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;

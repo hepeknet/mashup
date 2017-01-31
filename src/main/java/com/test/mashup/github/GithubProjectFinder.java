@@ -3,18 +3,17 @@ package com.test.mashup.github;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.test.mashup.ConfigurationUtil;
-import com.test.mashup.Constants;
 import com.test.mashup.JsonParser;
 import com.test.mashup.SimpleNativeJsonParser;
+import com.test.mashup.util.ConfigurationUtil;
+import com.test.mashup.util.Constants;
 
-//TODO: add max limit
 //TODO: externalize config
 //TODO: error handling
 //TODO: http code handling and retries
@@ -22,19 +21,19 @@ public class GithubProjectFinder {
 
 	private final Logger log = Logger.getLogger(getClass().getName());
 
-	private static final String DEFAULT_SORT_FIELD = "stars";
-
 	private final JsonParser parser = new SimpleNativeJsonParser();
 	private final String baseUrl = ConfigurationUtil.getString(Constants.GITHUB_SEARCH_BASE_URL_PROPERTY_NAME);
 	private final int projectSearchLimit = ConfigurationUtil
 			.getInt(Constants.GITHUB_SEARCH_MAX_PROJECTS_LIMIT_PROPERTY_NAME);
+	private final String sortField = ConfigurationUtil
+			.getString(Constants.GITHUB_SEARCH_DEFAULT_SORT_FIELD_PROPERTY_NAME);
 
 	public List<GithubProject> findProjects(String keyword) {
 		return findProjects(keyword, projectSearchLimit);
 	}
 
 	public List<GithubProject> findProjects(String keyword, int limit) {
-		return findProjects(keyword, limit, DEFAULT_SORT_FIELD);
+		return findProjects(keyword, limit, sortField);
 	}
 
 	public List<GithubProject> findProjects(String keyword, int limit, String orderByField) {
@@ -50,8 +49,9 @@ public class GithubProjectFinder {
 			searchUrl += "&sort=" + orderByField;
 		}
 		log.info("Github projects search URL is " + searchUrl);
-		final List<GithubProject> results = new LinkedList<>();
+		// make sure limit is within normal range
 		final int limitOutput = (limit <= 0 || limit > projectSearchLimit) ? projectSearchLimit : limit;
+		final List<GithubProject> results = new ArrayList<GithubProject>(limitOutput);
 		try {
 			final Map<String, Object> searchResultsParsed = parser.parse(new URL(searchUrl).openStream());
 			if (searchResultsParsed != null && !searchResultsParsed.isEmpty()) {
@@ -67,8 +67,8 @@ public class GithubProjectFinder {
 						final Integer watchers = (Integer) itemMap.get("watchers");
 						final GithubProject project = new GithubProject(name, description, forks, watchers, url);
 						results.add(project);
-						// unfortunately github search does not support limit so
-						// we have to do it manually here
+						// unfortunately github search API does not support
+						// limit so we have to do it manually here
 						if (results.size() == limitOutput) {
 							log.info("Limiting number of github projects to " + limitOutput);
 							break;
@@ -81,12 +81,12 @@ public class GithubProjectFinder {
 				log.severe("Was not able to parse search results when accessing " + searchUrl);
 			}
 		} catch (final MalformedURLException mue) {
-			log.severe("Malformed URL " + searchUrl);
+			throw new IllegalStateException("Malformed URL " + searchUrl, mue);
 		} catch (final IOException ie) {
-			log.log(Level.SEVERE, "IO exception while searching for projects on " + searchUrl, ie);
+			throw new IllegalStateException("IO exception while searching for projects on " + searchUrl, ie);
 		}
 		if (log.isLoggable(Level.FINE)) {
-			log.fine("Search results are " + results);
+			log.fine("Github project search results are " + results);
 		}
 		return results;
 	}

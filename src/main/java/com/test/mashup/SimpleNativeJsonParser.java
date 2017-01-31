@@ -16,6 +16,8 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import com.test.mashup.util.StringUtil;
+
 /**
  * Simple native JSON parser able to parse JSON input into <tt>Map</tt> using
  * only JDK classes. Ideally this should be replaced with some more robust 3PP
@@ -109,36 +111,40 @@ public class SimpleNativeJsonParser implements JsonParser {
 		if (isBuiltInJavaClass) {
 			throw new UnsupportedOperationException("Unable to convert type " + obj.getClass().getName() + " to JSON!");
 		} else {
-			if (log.isLoggable(Level.FINE)) {
-				log.fine("Converting " + obj + " pojo to JSON");
-			}
-			final StringBuilder sb = new StringBuilder("{");
-			try {
-				final Object[] values = Arrays.asList(Introspector.getBeanInfo(obj.getClass()).getPropertyDescriptors())
-						.stream()
-						// filter out properties with setters only
-						.filter(pd -> Objects.nonNull(pd.getReadMethod()))
-						.filter(pd -> pd.getReadMethod().getName() != "getClass").map(pd -> {
-							try {
-								return pd.getReadMethod().invoke(obj);
-							} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-								throw new IllegalStateException(e);
-							}
-						}).toArray();
-				for (int i = 0; i < values.length; i++) {
-					if (i != 0) {
-						sb.append(", ");
-					}
-					final String fieldJsonVal = toJson(values[i]);
-					sb.append(fieldJsonVal);
-				}
-			} catch (final IntrospectionException e) {
-				e.printStackTrace();
-			}
-
-			sb.append("}");
-			return sb.toString();
+			return pojoToJson(obj);
 		}
+	}
+
+	private String pojoToJson(Object obj) {
+		if (log.isLoggable(Level.FINE)) {
+			log.fine("Converting " + obj + " pojo to JSON");
+		}
+		final StringBuilder sb = new StringBuilder("{");
+		try {
+			final Object[] values = Arrays.asList(Introspector.getBeanInfo(obj.getClass()).getPropertyDescriptors())
+					.stream()
+					// filter out properties with setters only
+					.filter(pd -> Objects.nonNull(pd.getReadMethod()))
+					// filter out getClass method from java.lang.Object
+					.filter(pd -> pd.getReadMethod().getName() != "getClass").map(pd -> {
+						try {
+							return pd.getReadMethod().invoke(obj);
+						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+							throw new IllegalStateException(e);
+						}
+					}).toArray();
+			for (int i = 0; i < values.length; i++) {
+				if (i != 0) {
+					sb.append(", ");
+				}
+				final String fieldJsonVal = toJson(values[i]);
+				sb.append(fieldJsonVal);
+			}
+		} catch (final IntrospectionException e) {
+			e.printStackTrace();
+		}
+		sb.append("}");
+		return sb.toString();
 	}
 
 }

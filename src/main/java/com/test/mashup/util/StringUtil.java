@@ -1,4 +1,4 @@
-package com.test.mashup;
+package com.test.mashup.util;
 
 import java.io.InputStream;
 import java.util.Scanner;
