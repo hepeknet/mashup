@@ -27,11 +27,11 @@ import com.test.mashup.util.StringUtil;
 //TODO: http code handling and retries
 
 /**
- * 
+ *
  * Responsible for searching twitter. Ideally this would use some external
  * library like tweeter4j but since we are not allowed to do that then we have
  * to write a lot of plumbing code ourselves.
- * 
+ *
  * @author borisa
  *
  */
@@ -99,6 +99,7 @@ public class TweetFinder {
 		if (keyword == null) {
 			throw new IllegalArgumentException("Keyword must not be null");
 		}
+		System.out.println("Thread: " + Thread.currentThread().getId());
 		try {
 			final long start = System.currentTimeMillis();
 			final boolean shouldRetryGettingBearerInCaseOfFailure = true;

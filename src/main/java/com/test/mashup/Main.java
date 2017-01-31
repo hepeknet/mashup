@@ -1,8 +1,11 @@
 package com.test.mashup;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -16,17 +19,30 @@ import com.test.mashup.twitter.TweetFinder;
  * Main entry point into application. Ideally this should be replaced with some
  * kind of REST endpoint (Jetty, Spring boot...) if this is to be exposed as
  * some kind of microservice.
- * 
+ *
  * @author borisa
  *
  */
 public class Main {
+
+	static {
+		setupLogging();
+	}
 
 	private static final Logger LOG = Logger.getLogger(Main.class.getName());
 
 	private static GithubProjectFinder githubFinder = DependenciesFactory.createGithubProjectFinder();
 	private static TweetFinder tweetFinder = DependenciesFactory.createTweetFinder();
 	private static JsonParser parser = DependenciesFactory.createParser();
+
+	private static void setupLogging() {
+		final InputStream configFile = Main.class.getResourceAsStream("/logging.properties");
+		try {
+			LogManager.getLogManager().readConfiguration(configFile);
+		} catch (SecurityException | IOException e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static void main1(String[] args) throws Exception {
 		String line = null;
@@ -39,8 +55,8 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws Exception {
-		doExecute("reactive");
-		doExecute("reactive");
+		// doExecute("reactive");
+		// doExecute("reactive");
 		doExecuteAsync("reactive");
 	}
 
