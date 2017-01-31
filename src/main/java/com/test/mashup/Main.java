@@ -2,7 +2,9 @@ package com.test.mashup;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.test.mashup.github.GithubProject;
 import com.test.mashup.github.GithubProjectFinder;
@@ -39,7 +41,23 @@ public class Main {
 	public static void main(String[] args) throws Exception {
 		doExecute("reactive");
 		doExecute("reactive");
-		doExecute("reactive");
+		doExecuteAsync("reactive");
+	}
+
+	private static void doExecuteAsync(String keyword) {
+		final List<GithubProject> projects = githubFinder.findProjects(keyword);
+		final List<GithubProjectWithTweets> allProjects = projects.stream()
+				.map(p -> CompletableFuture.supplyAsync(() -> {
+					final List<Tweet> tweets = tweetFinder.searchTwitter(p.getName());
+					final GithubProjectWithTweets gt = new GithubProjectWithTweets();
+					gt.setProject(p);
+					gt.setTweets(tweets);
+					return gt;
+				})).map(CompletableFuture::join).collect(Collectors.toList());
+		final OutputResult result = new OutputResult();
+		result.setProjects(allProjects);
+		final String json = parser.toJson(result);
+		System.out.println(json);
 	}
 
 	private static void doExecute(String keyword) {
