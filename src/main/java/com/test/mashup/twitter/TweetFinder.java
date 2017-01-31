@@ -13,18 +13,19 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.test.mashup.JsonParser;
-import com.test.mashup.SimpleNativeJsonParser;
+import com.test.mashup.DependenciesFactory;
+import com.test.mashup.json.JsonParser;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 import com.test.mashup.util.StringUtil;
 
-// TODO: add pagination & max number of tweets
+// TODO: use Twitter pagination - not needed in current releaset
+
 // TODO: fix error handlings
-//TODO: externalize config
 //TODO: http code handling and retries
 
 /**
+ * 
  * Responsible for searching twitter. Ideally this would use some external
  * library like tweeter4j but since we are not allowed to do that then we have
  * to write a lot of plumbing code ourselves.
@@ -45,6 +46,8 @@ public class TweetFinder {
 	private final String key = ConfigurationUtil.getString(Constants.TWITTER_AUTH_KEY_PROPERTY_NAME);
 	private final String secret = ConfigurationUtil.getString(Constants.TWITTER_AUTH_SECRET_PROPERTY_NAME);
 
+	private final JsonParser parser = DependenciesFactory.createParser();
+
 	/*
 	 * We can cache bearer once we obtain it. It is valid until it is
 	 * invalidated manually. We detect that in our code and try to obtain it
@@ -52,10 +55,9 @@ public class TweetFinder {
 	 */
 	private volatile String cachedBearer = null;
 
-	private final JsonParser parser = new SimpleNativeJsonParser();
-
 	private InputStream tryToGetTweets(String keyword) throws IOException {
 		final String searchUrl = baseSearchUrl + keyword + "&count=" + maxTweetsPerSearch;
+		log.info("Tweet search url is " + searchUrl);
 		/*
 		 * As per https://dev.twitter.com/oauth/application-only
 		 */
@@ -70,6 +72,11 @@ public class TweetFinder {
 		try {
 			final int httpCode = httpCon.getResponseCode();
 			log.info("Response code for twitter search [" + keyword + "] is " + httpCode);
+			/*
+			 * As per twitter API if bearer has been invalidated we will get 401
+			 * code back, so we invalidate cached bearer and try to obtain new
+			 * one.
+			 */
 			if (httpCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
 				log.info("Got unauthorized response when searching for tweets. Will try to obtain bearer again!");
 				cachedBearer = null;
@@ -126,6 +133,8 @@ public class TweetFinder {
 	 * As per https://dev.twitter.com/oauth/application-only
 	 */
 	private String getBearer(String urlStr) throws IOException {
+		// if cached then use that, in case when cached does not work anymore it
+		// will be invalidated and then we will ask twitter for new bearer token
 		if (cachedBearer == null) {
 			log.info("Was not able to find cached bearer - will try to obtain it...");
 			final URL url = new URL(urlStr);
@@ -154,12 +163,16 @@ public class TweetFinder {
 					if (bearerRequiredTokenType.equals(tokenType)) {
 						log.info("Successfully got bearer token and cached it");
 						cachedBearer = (String) parsedBody.get("access_token");
+						log.fine("Found bearer and cached its value");
 					} else {
-						log.warning("Got wrong token type for bearer [" + tokenType + "]. Expected "
+						throw new IllegalStateException("Got wrong token type for bearer [" + tokenType + "]. Expected "
 								+ bearerRequiredTokenType);
 					}
+				} else {
+					throw new IllegalStateException(
+							"Did not find appropriate data in response - unable to get bearer token!");
 				}
-			} catch (final Exception exc) {
+			} catch (final IOException exc) {
 				handleHttpConnectionError(httpCon, "bearer fetch");
 			}
 		}
@@ -172,7 +185,7 @@ public class TweetFinder {
 		if (conn.getErrorStream() != null) {
 			errorDescription = StringUtil.inputStreamToString(conn.getErrorStream());
 		}
-		log.severe(
+		throw new IllegalStateException(
 				"Caught exception performing " + phase + ". Error: " + message + ", description: " + errorDescription);
 	}
 

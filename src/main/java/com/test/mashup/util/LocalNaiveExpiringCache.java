@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  * @author borisa
  *
  */
-public class LocalNaiveExpiringCache implements ExpiringCache {
+public class LocalNaiveExpiringCache<T> implements ExpiringCache<T> {
 
 	private final int maxCacheSize = ConfigurationUtil.getInt(Constants.LOCAL_CACHE_MAX_SIZE_PROPERTY_NAME);
 
@@ -29,21 +29,25 @@ public class LocalNaiveExpiringCache implements ExpiringCache {
 	/*
 	 * Map contains key-value mappings for this cache
 	 */
-	private final Map<String, Object> cache = new ConcurrentHashMap<>();
+	private final Map<String, T> cache = new ConcurrentHashMap<>();
 
 	/*
 	 * Delay queue knows when each key expires and is synchronized with the
-	 * cache Map
+	 * cache Map. Whenever key expires in this queue we also expire value in the
+	 * map. Expiration check is done on each get request.
 	 */
 	private final DelayQueue<ExpiringElement> validKeys = new DelayQueue<>();
 
 	@Override
-	public void put(String key, Object value, long expiration, TimeUnit unit) {
+	public void put(String key, T value, long expiration, TimeUnit unit) {
 		if (key == null || key.isEmpty()) {
 			throw new IllegalArgumentException("Key must not be null or empty");
 		}
 		if (unit == null) {
 			throw new IllegalArgumentException("Time unit must not be null");
+		}
+		if (value == null) {
+			throw new IllegalArgumentException("Value must not be null");
 		}
 		// for expiration <=0 we do not cache, expire immediately
 		if (expiration > 0) {
@@ -55,6 +59,10 @@ public class LocalNaiveExpiringCache implements ExpiringCache {
 		}
 	}
 
+	/*
+	 * In case when cache grows too big we clear it. This will hurt performance
+	 * but will keep application healthy.
+	 */
 	private void checkMaxCacheSizeAndPurgeIfNeeded() {
 		if (cache.size() > maxCacheSize) {
 			log.info("Local cache exceeded max cache size of " + maxCacheSize + " will purge it...");
@@ -65,7 +73,7 @@ public class LocalNaiveExpiringCache implements ExpiringCache {
 	}
 
 	@Override
-	public Object get(String key) {
+	public T get(String key) {
 		if (key == null || key.isEmpty()) {
 			return null;
 		}
@@ -73,6 +81,10 @@ public class LocalNaiveExpiringCache implements ExpiringCache {
 		return cache.get(key);
 	}
 
+	/*
+	 * Find all expired keys and then remove cached values associated with those
+	 * keys.
+	 */
 	private void removeExpiredKeys() {
 		log.fine("Removing expired keys");
 		final List<ExpiringElement> expiredKeys = new LinkedList<>();

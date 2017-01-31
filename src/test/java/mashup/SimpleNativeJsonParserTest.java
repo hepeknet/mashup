@@ -6,8 +6,8 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.test.mashup.JsonParser;
-import com.test.mashup.SimpleNativeJsonParser;
+import com.test.mashup.json.JsonParser;
+import com.test.mashup.json.SimpleNativeJsonParser;
 
 public class SimpleNativeJsonParserTest {
 
@@ -29,7 +29,7 @@ public class SimpleNativeJsonParserTest {
 		sp.setX(42);
 		sp.setY("ratm");
 		final String json = parser.toJson(sp);
-		assertEquals("{42, \"ratm\"}", json);
+		assertEquals("{\"x\" : 42, \"y\" : \"ratm\"}", json);
 	}
 
 }

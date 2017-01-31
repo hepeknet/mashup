@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import com.test.mashup.github.GithubProject;
 import com.test.mashup.github.GithubProjectFinder;
+import com.test.mashup.json.JsonParser;
 import com.test.mashup.twitter.Tweet;
 import com.test.mashup.twitter.TweetFinder;
 
@@ -13,9 +14,9 @@ public class Main {
 
 	private static final Logger LOG = Logger.getLogger(Main.class.getName());
 
-	private static GithubProjectFinder githubFinder = new GithubProjectFinder();
-	private static TweetFinder tweetFinder = new TweetFinder();
-	private static JsonParser parser = new SimpleNativeJsonParser();
+	private static GithubProjectFinder githubFinder = DependenciesFactory.createGithubProjectFinder();
+	private static TweetFinder tweetFinder = DependenciesFactory.createTweetFinder();
+	private static JsonParser parser = DependenciesFactory.createParser();
 
 	public static void main1(String[] args) throws Exception {
 		String line = null;

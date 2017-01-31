@@ -12,7 +12,7 @@ import com.test.mashup.util.LocalNaiveExpiringCache;
 
 public class LocalNaiveExpiringCacheTest {
 
-	private final ExpiringCache cache = new LocalNaiveExpiringCache();
+	private final ExpiringCache<String> cache = new LocalNaiveExpiringCache<String>();
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullKey() {

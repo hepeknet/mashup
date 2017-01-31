@@ -1,4 +1,4 @@
-package com.test.mashup;
+package com.test.mashup.json;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
@@ -115,33 +116,42 @@ public class SimpleNativeJsonParser implements JsonParser {
 		}
 	}
 
+	/**
+	 * Simple and naive implementation of converting Java POJO to JSON string.
+	 * No need to support wide variety of options and all corner cases since we
+	 * only have to support our own POJOs.
+	 * 
+	 * @param obj
+	 * @return
+	 */
 	private String pojoToJson(Object obj) {
 		if (log.isLoggable(Level.FINE)) {
 			log.fine("Converting " + obj + " pojo to JSON");
 		}
 		final StringBuilder sb = new StringBuilder("{");
 		try {
-			final Object[] values = Arrays.asList(Introspector.getBeanInfo(obj.getClass()).getPropertyDescriptors())
-					.stream()
+
+			final Map<String, Object> fieldsAndValues = Arrays
+					.asList(Introspector.getBeanInfo(obj.getClass()).getPropertyDescriptors()).stream()
 					// filter out properties with setters only
 					.filter(pd -> Objects.nonNull(pd.getReadMethod()))
 					// filter out getClass method from java.lang.Object
-					.filter(pd -> pd.getReadMethod().getName() != "getClass").map(pd -> {
+					.filter(pd -> pd.getReadMethod().getName() != "getClass")
+					.collect(Collectors.toMap(pd -> pd.getDisplayName(), pd -> {
 						try {
 							return pd.getReadMethod().invoke(obj);
 						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 							throw new IllegalStateException(e);
 						}
-					}).toArray();
-			for (int i = 0; i < values.length; i++) {
-				if (i != 0) {
-					sb.append(", ");
-				}
-				final String fieldJsonVal = toJson(values[i]);
-				sb.append(fieldJsonVal);
-			}
+					}));
+			fieldsAndValues.forEach((k, v) -> {
+				final String valueToJson = toJson(v);
+				sb.append("\"").append(k).append("\" : ").append(valueToJson).append(", ");
+			});
+			// remove last unneeded comma character and space
+			sb.delete(sb.length() - 2, sb.length());
 		} catch (final IntrospectionException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("Exception while introspecting for json generation", e);
 		}
 		sb.append("}");
 		return sb.toString();

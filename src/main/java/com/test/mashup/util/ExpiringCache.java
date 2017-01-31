@@ -8,14 +8,14 @@ import java.util.concurrent.TimeUnit;
  * Ideally we would use some kind of 3PP cache like EHCache, Guava, Infinispan
  * or Hazelcast. But since we are not allowed to use 3PP we create our own
  * interface and simple implementation. This allows us to later swap to better
- * implementation without disrupting our code too much.
+ * implementation without disrupting the rest of our code too much.
  * 
- * Implementations of this cache are thread safe.
+ * Implementations of this cache must always be thread safe.
  * 
  * @author borisa
  *
  */
-public interface ExpiringCache {
+public interface ExpiringCache<T> {
 
 	/**
 	 * Caches value and associates expiration period with it.
@@ -31,7 +31,7 @@ public interface ExpiringCache {
 	 * @param unit
 	 *            then unit of time used for expiration. Must not be null.
 	 */
-	void put(String key, Object value, long expiration, TimeUnit unit);
+	void put(String key, T value, long expiration, TimeUnit unit);
 
 	/**
 	 * Returns the value associated with given key.
@@ -42,6 +42,6 @@ public interface ExpiringCache {
 	 * @return the associated value or null in case value expired or never was
 	 *         cached at all.
 	 */
-	Object get(String key);
+	T get(String key);
 
 }

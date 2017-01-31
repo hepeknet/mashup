@@ -1,0 +1,1 @@
+/home/borisa/programs/jdk1.8.0_121/bin/java -jar ./target/mashup-0.0.1-SNAPSHOT.jar

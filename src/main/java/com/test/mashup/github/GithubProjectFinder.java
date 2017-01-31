@@ -9,19 +9,33 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.test.mashup.JsonParser;
-import com.test.mashup.SimpleNativeJsonParser;
+import com.test.mashup.DependenciesFactory;
+import com.test.mashup.json.JsonParser;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 
-//TODO: externalize config
 //TODO: error handling
 //TODO: http code handling and retries
+
+/**
+ * Implementation of Github project search by keyword.
+ * 
+ * @author borisa
+ *
+ */
 public class GithubProjectFinder {
 
-	private final Logger log = Logger.getLogger(getClass().getName());
+	protected final Logger log = Logger.getLogger(getClass().getName());
 
-	private final JsonParser parser = new SimpleNativeJsonParser();
+	/*
+	 * Simulate DI for parser - in case we switch to more robust 3PP based
+	 * implementation for JSON parsing
+	 */
+	private final JsonParser parser = DependenciesFactory.createParser();
+
+	/*
+	 * Configuration properties
+	 */
 	private final String baseUrl = ConfigurationUtil.getString(Constants.GITHUB_SEARCH_BASE_URL_PROPERTY_NAME);
 	private final int projectSearchLimit = ConfigurationUtil
 			.getInt(Constants.GITHUB_SEARCH_MAX_PROJECTS_LIMIT_PROPERTY_NAME);
@@ -36,6 +50,32 @@ public class GithubProjectFinder {
 		return findProjects(keyword, limit, sortField);
 	}
 
+	/**
+	 * Builds search HTTP URL based on parameters provided
+	 * 
+	 * @param keyword
+	 *            search keyword - must not be null or empty string
+	 * @param limit
+	 *            the number of projects to be returned. Must be greater than 0.
+	 * @param orderByField
+	 *            the name of field to be used for sorting results
+	 * @return valid HTTP URL for searching Github projects
+	 */
+	protected String buildUrl(String keyword, int limit, String orderByField) {
+		String searchUrl = baseUrl + keyword;
+		if (orderByField != null && !orderByField.isEmpty()) {
+			log.info("Will sort github projects by field " + orderByField);
+			searchUrl += "&sort=" + orderByField;
+		}
+		log.info("Github projects search URL is " + searchUrl);
+		return searchUrl;
+	}
+
+	protected int normalizeLimit(int limit) {
+		final int limitOutput = (limit <= 0 || limit > projectSearchLimit) ? projectSearchLimit : limit;
+		return limitOutput;
+	}
+
 	public List<GithubProject> findProjects(String keyword, int limit, String orderByField) {
 		if (keyword == null) {
 			throw new IllegalArgumentException("Keyword must not be null");
@@ -43,17 +83,15 @@ public class GithubProjectFinder {
 		if (keyword.isEmpty()) {
 			throw new IllegalArgumentException("Keyword must not be empty string");
 		}
-		String searchUrl = baseUrl + keyword;
-		if (orderByField != null && !orderByField.isEmpty()) {
-			log.info("Will sort github projects by field " + orderByField);
-			searchUrl += "&sort=" + orderByField;
-		}
-		log.info("Github projects search URL is " + searchUrl);
-		// make sure limit is within normal range
-		final int limitOutput = (limit <= 0 || limit > projectSearchLimit) ? projectSearchLimit : limit;
+		final int limitOutput = normalizeLimit(limit);
+		final String searchUrl = buildUrl(keyword, limitOutput, orderByField);
+		// make sure limit is within acceptable range
 		final List<GithubProject> results = new ArrayList<GithubProject>(limitOutput);
 		try {
 			final Map<String, Object> searchResultsParsed = parser.parse(new URL(searchUrl).openStream());
+			if (log.isLoggable(Level.FINE)) {
+				log.fine("Parsed search results are " + searchResultsParsed);
+			}
 			if (searchResultsParsed != null && !searchResultsParsed.isEmpty()) {
 				final Object foundItems = searchResultsParsed.get("items");
 				if (foundItems != null) {
@@ -75,13 +113,14 @@ public class GithubProjectFinder {
 						}
 					}
 				} else {
-					log.severe("Was not able to find [items] in parsed search results. Did GitHub API change?");
+					log.severe("Was not able to find field [items] in parsed search results. Did GitHub API change?");
 				}
 			} else {
-				log.severe("Was not able to parse search results when accessing " + searchUrl);
+				log.severe("Was not able to parse search results when accessing " + searchUrl
+						+ ". Check log for more details!");
 			}
 		} catch (final MalformedURLException mue) {
-			throw new IllegalStateException("Malformed URL " + searchUrl, mue);
+			throw new IllegalStateException("Malformed URL for github project search [" + searchUrl + "]", mue);
 		} catch (final IOException ie) {
 			throw new IllegalStateException("IO exception while searching for projects on " + searchUrl, ie);
 		}

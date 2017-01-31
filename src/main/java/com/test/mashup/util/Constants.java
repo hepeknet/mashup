@@ -24,4 +24,6 @@ public interface Constants {
 
 	String LOCAL_CACHE_MAX_SIZE_PROPERTY_NAME = "local_cache_max_size";
 
+	String GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME = "github_search_cache_timeout_seconds";
+
 }

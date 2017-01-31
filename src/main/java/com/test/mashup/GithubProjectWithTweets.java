@@ -5,6 +5,12 @@ import java.util.List;
 import com.test.mashup.github.GithubProject;
 import com.test.mashup.twitter.Tweet;
 
+/**
+ * POJO used by {@code OutputResult} for presenting final results of our search.
+ * 
+ * @author borisa
+ *
+ */
 public class GithubProjectWithTweets {
 
 	private GithubProject project;
@@ -30,10 +36,6 @@ public class GithubProjectWithTweets {
 	public String toString() {
 		return "GithubProjectWithTweets [" + (project != null ? "project=" + project + ", " : "")
 				+ (tweets != null ? "tweets=" + tweets : "") + "]";
-	}
-
-	public String toJSON() {
-		return "";
 	}
 
 }
