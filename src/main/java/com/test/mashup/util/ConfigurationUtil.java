@@ -6,6 +6,13 @@ import java.io.InputStream;
 import java.util.Properties;
 import java.util.logging.Logger;
 
+/**
+ * Configuration utility. If we used 3PP for configuration this would not be
+ * necessary to exist.
+ * 
+ * @author borisa
+ *
+ */
 public abstract class ConfigurationUtil {
 
 	private static final Logger LOG = Logger.getLogger(ConfigurationUtil.class.getName());
@@ -37,6 +44,15 @@ public abstract class ConfigurationUtil {
 		return props;
 	}
 
+	/**
+	 * Returns the value of configuration property as String.
+	 * 
+	 * @param propName
+	 *            the name for which configuration value is needed. Must not be
+	 *            null or empty.
+	 * @return the value associated with configuration property name or null if
+	 *         none exists.
+	 */
 	public static String getString(String propName) {
 		if (propName == null || propName.isEmpty()) {
 			throw new IllegalArgumentException("Configuration property name must not be null or empty");
@@ -45,6 +61,16 @@ public abstract class ConfigurationUtil {
 		return PROPS.getProperty(propName);
 	}
 
+	/**
+	 * Returns the value of configuration property as int.
+	 * 
+	 * @param propName
+	 *            the name for which configuration value is needed. Must not be
+	 *            null or empty.
+	 * @return the value associated with configuration property name. Throws
+	 *         exception in case configuration property does not exist or can
+	 *         not be converted into integer.
+	 */
 	public static int getInt(String propName) {
 		final String strValue = getString(propName);
 		LOG.fine("Trying to get configuration value [" + strValue + "] for [" + propName + "] as Integer");

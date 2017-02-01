@@ -16,11 +16,11 @@ import com.test.mashup.metrics.Histogram;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 
-//TODO: error handling
-//TODO: http code handling and retries
-
 /**
- * Implementation of Github project search by keyword.
+ * Implementation of Github project search by keyword. Very basic form of error
+ * handling here. We expect that retry policy will be applied on invocation of
+ * this search and that someone with more visibility into overall application
+ * structure will perform sensible retries and recovery.
  * 
  * @author borisa
  *
@@ -39,7 +39,7 @@ public class GithubProjectFinder {
 			.getHistogram("GithubProjectSearchTimeStats");
 
 	private final Counter githubSearchFailures = DependenciesFactory.createMetrics()
-			.getCounter("GithubProjectSearchFailures");
+			.getCounter("GithubProjectSearchFailuresCount");
 
 	/*
 	 * Configuration properties
@@ -97,6 +97,12 @@ public class GithubProjectFinder {
 		final List<GithubProject> results = new ArrayList<GithubProject>(limitOutput);
 		try {
 			final long startTime = System.currentTimeMillis();
+			/*
+			 * Ideally we would not have to do this if we had 3PP doing Json
+			 * parsing for us. But because of limited time to develop this
+			 * project and because of limitation that we can not use any 3PP we
+			 * had to create JSON parser that returns Map.
+			 */
 			final Map<String, Object> searchResultsParsed = parser.parse(new URL(searchUrl).openStream());
 			if (log.isLoggable(Level.FINE)) {
 				log.fine("Parsed search results are " + searchResultsParsed);
@@ -125,11 +131,12 @@ public class GithubProjectFinder {
 					searchStatistics.update(totalTimeMs);
 				} else {
 					githubSearchFailures.inc();
-					log.severe("Was not able to find field [items] in parsed search results. Did GitHub API change?");
+					throw new RuntimeException(
+							"Was not able to find field [items] in parsed search results. Did GitHub API change?");
 				}
 			} else {
 				githubSearchFailures.inc();
-				log.severe("Was not able to parse search results when accessing " + searchUrl
+				throw new RuntimeException("Was not able to parse search results when accessing " + searchUrl
 						+ ". Check log for more details!");
 			}
 		} catch (final MalformedURLException mue) {

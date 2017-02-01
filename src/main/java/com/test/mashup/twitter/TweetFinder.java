@@ -21,16 +21,22 @@ import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 import com.test.mashup.util.StringUtil;
 
-// TODO: use Twitter pagination - not needed in current releaset
-
-// TODO: fix error handlings
-//TODO: http code handling and retries
+// TODO: use Twitter pagination - not needed in current release
 
 /**
  *
  * Responsible for searching twitter. Ideally this would use some external
  * library like tweeter4j but since we are not allowed to do that then we have
  * to write a lot of plumbing code ourselves.
+ * 
+ * This class does some basic caching (like bearer) and basic recovery based on
+ * returned HTTP codes. It assumes that some higher level code will perform
+ * retry and recovery.
+ * 
+ * Implementation looks ugly because we had to use {@link HttpURLConnection} to
+ * access Twitter API.
+ * 
+ * Implementation exposes some basic statistics.
  *
  * @author borisa
  *
@@ -39,6 +45,9 @@ public class TweetFinder {
 
 	private final Logger log = Logger.getLogger(getClass().getName());
 
+	/*
+	 * Configuration parameters
+	 */
 	private final String baseSearchUrl = ConfigurationUtil.getString(Constants.TWITTER_SEARCH_BASE_URL_PROPERTY_NAME);
 	private final String bearerUrl = ConfigurationUtil.getString(Constants.TWITTER_BEARER_URL_PROPERTY_NAME);
 	private final String bearerRequiredTokenType = ConfigurationUtil
@@ -48,15 +57,22 @@ public class TweetFinder {
 	private final String key = ConfigurationUtil.getString(Constants.TWITTER_AUTH_KEY_PROPERTY_NAME);
 	private final String secret = ConfigurationUtil.getString(Constants.TWITTER_AUTH_SECRET_PROPERTY_NAME);
 
+	/*
+	 * Parser for JSON
+	 */
 	private final JsonParser parser = DependenciesFactory.createParser();
 
-	private final Histogram tweetSearchStats = DependenciesFactory.createMetrics().getHistogram("TwitterSearchStats");
+	/*
+	 * Used for exposing metrics to external world
+	 */
+	private final Histogram tweetSearchStats = DependenciesFactory.createMetrics()
+			.getHistogram("TwitterSearchExecutionTimeStats");
 	private final Counter tweetSearchFailures = DependenciesFactory.createMetrics().getCounter("TwitterSearchFailures");
 
 	/*
 	 * We can cache bearer once we obtain it. It is valid until it is
-	 * invalidated manually. We detect that in our code and try to obtain it
-	 * again.
+	 * invalidated manually - as per Twitter API. We detect that in our code and
+	 * try to obtain it again.
 	 */
 	private volatile String cachedBearer = null;
 
@@ -95,9 +111,22 @@ public class TweetFinder {
 		return httpCon.getInputStream();
 	}
 
+	/**
+	 * Searches twitter based on given keyword.
+	 * 
+	 * TODO: add pagination support
+	 * 
+	 * @param keyword
+	 *            to use for search. Must not be null or empty string.
+	 * @return a list of tweets containing given keyword. List will have a
+	 *         limited size based on configuration.
+	 */
 	public List<Tweet> searchTwitter(String keyword) {
 		if (keyword == null) {
 			throw new IllegalArgumentException("Keyword must not be null");
+		}
+		if (keyword.isEmpty()) {
+			throw new IllegalArgumentException("Keyword must not be empty string");
 		}
 		try {
 			final long start = System.currentTimeMillis();
@@ -108,6 +137,10 @@ public class TweetFinder {
 				if (log.isLoggable(Level.FINE)) {
 					log.fine("Search by [" + keyword + "] returned response " + responseBody);
 				}
+				/*
+				 * Ideally all this Map handling would not be needed if we had
+				 * more time or were allowed to use 3PP for JSON parsing
+				 */
 				final Map<String, Object> mapTweets = parser.parse(responseBody);
 				final Object statuses = mapTweets.get("statuses");
 				if (statuses != null) {
@@ -127,6 +160,7 @@ public class TweetFinder {
 						tweets.add(tweet);
 					}
 					final long totalMs = System.currentTimeMillis() - start;
+					// expose some statistics
 					tweetSearchStats.update(totalMs);
 					return tweets;
 				} else {
@@ -200,7 +234,7 @@ public class TweetFinder {
 		if (conn.getErrorStream() != null) {
 			errorDescription = StringUtil.inputStreamToString(conn.getErrorStream());
 		}
-		throw new IllegalStateException(
+		throw new RuntimeException(
 				"Caught exception performing " + phase + ". Error: " + message + ", description: " + errorDescription);
 	}
 

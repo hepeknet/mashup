@@ -1,5 +1,11 @@
 package com.test.mashup.util;
 
+/**
+ * Constants used by our application
+ * 
+ * @author borisa
+ *
+ */
 public interface Constants {
 
 	String CONFIGURATION_LOCATION_SYS_PROPERTY_NAME = "mashup.config.location";
@@ -31,5 +37,9 @@ public interface Constants {
 	String TWITTER_SEARCH_RETRY_MAX_ATTEMPTS_PROPERTY_NAME = "twitter_search_retry_max_attempts";
 
 	String TWITTER_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME = "twitter_search_retry_fixed_backoff_millis";
+
+	String GITHUB_SEARCH_RETRY_MAX_ATTEMPTS_PROPERTY_NAME = "github_search_retry_max_attemps";
+
+	String GITHUB_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME = "github_search_retry_fixed_backoff_millis";
 
 }

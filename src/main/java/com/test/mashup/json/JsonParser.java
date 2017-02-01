@@ -13,6 +13,12 @@ import java.util.Map;
  * the amount of time provided for this task.
  * 
  * All implementations of this interface must be thread-safe.
+ * 
+ * Since we are using this parser for multiple different purposes we decided to
+ * have generic capability to parse JSON object into Java Map - so that we can
+ * use regardless of what POJO is really needed in the end. The downside is that
+ * there must be intermediary translation code from Map into internal POJO. The
+ * advantage is that we can use this parser for pretty much any JSON type.
  *
  * @author borisa
  *

@@ -22,7 +22,19 @@ import com.test.mashup.util.StringUtil;
 /**
  * Simple native JSON parser able to parse JSON input into <tt>Map</tt> using
  * only JDK classes. Ideally this should be replaced with some more robust 3PP
- * like Jackson
+ * like Jackson.
+ * 
+ * This is pretty limited implementation that works nicely for JSON we need in
+ * this project. If we had more freedom or more time this is the first thing
+ * that should be fixed in this project. Either by adding more robust tests and
+ * handling more complex JSON/Java structures or by replacing it with some other
+ * implementation.
+ * 
+ * Also, dependency on fairly late Java 8 implementations is not ideal but it is
+ * much better than writing JSON parser from scratch.
+ * 
+ * Performance impact should also be measured, whether this implementation is
+ * comparable with other 3PPs.
  *
  * @author borisa
  *

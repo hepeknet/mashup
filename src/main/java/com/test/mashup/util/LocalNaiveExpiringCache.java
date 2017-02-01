@@ -15,16 +15,20 @@ import java.util.logging.Logger;
  * 
  * This implementation uses {@code DelayQueue} for expiration. No need for
  * background threads to clear the cache since clearing is done on every get
- * request.
+ * request - which is a good compromise between speed and accuracy.
+ * 
+ * Also, cache will self-protect by limiting number of items that can be cached
+ * at any point in time. This will have performance impact but will prevent OOM
+ * exceptions and GC problems.
  * 
  * @author borisa
  *
  */
 public class LocalNaiveExpiringCache<T> implements ExpiringCache<T> {
 
-	private final int maxCacheSize = ConfigurationUtil.getInt(Constants.LOCAL_CACHE_MAX_SIZE_PROPERTY_NAME);
-
 	private final Logger log = Logger.getLogger(getClass().getName());
+
+	private final int maxCacheSize = ConfigurationUtil.getInt(Constants.LOCAL_CACHE_MAX_SIZE_PROPERTY_NAME);
 
 	/*
 	 * Map contains key-value mappings for this cache
@@ -96,6 +100,12 @@ public class LocalNaiveExpiringCache<T> implements ExpiringCache<T> {
 		log.info("In total removed " + expiredKeys.size() + " expired keys from cache...");
 	}
 
+	/**
+	 * Internal implementation used for key expiration.
+	 * 
+	 * @author borisa
+	 *
+	 */
 	class ExpiringElement implements Delayed {
 
 		private final String key;

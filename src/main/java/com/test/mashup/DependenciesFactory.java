@@ -13,10 +13,12 @@ import com.test.mashup.util.ExpiringCache;
 import com.test.mashup.util.LocalNaiveExpiringCache;
 
 /**
- * Since we can not use dependency injection framework (like Guice, Spring or
- * CDI) we will use this factory to make sure we can easily switch from one
- * implementation to another one, without the need to change other parts of our
- * code.
+ * Since we can not use dependency injection framework (like Guice, Spring,
+ * ServiceLoader or CDI) we will use this factory to make sure we can easily
+ * switch from one implementation to another one, without the need to change
+ * other parts of our code.
+ * 
+ * Ideally our project should use some kind of DI.
  * 
  * @author borisa
  *

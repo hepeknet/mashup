@@ -48,6 +48,8 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 				+ fixedBackOffPeriodMillis);
 		V v = null;
 		Exception lastThrowsException = null;
+		// try to recover and either return result in case of success or last
+		// thrown Exception in case of failure
 		for (int i = 0; i < maxAttempts; i++) {
 			try {
 				v = e.call();

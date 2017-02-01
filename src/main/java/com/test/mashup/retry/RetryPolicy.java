@@ -6,7 +6,8 @@ import java.util.concurrent.Callable;
  * Used for retrying execution. Does not use its own threading but uses whatever
  * thread was given to it.
  * 
- * Implementations are not thread safe.
+ * Implementations of this class are not thread safe. Ideally should be replaced
+ * by some 3PP APIs - like Spring.
  * 
  * @author borisa
  *

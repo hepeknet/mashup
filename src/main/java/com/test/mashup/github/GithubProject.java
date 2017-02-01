@@ -1,5 +1,12 @@
 package com.test.mashup.github;
 
+/**
+ * POJO used internally by our application to represent subset of Github project
+ * datastructure.
+ * 
+ * @author borisa
+ *
+ */
 public class GithubProject {
 
 	private final String name;

@@ -1,5 +1,12 @@
 package com.test.mashup.twitter;
 
+/**
+ * POJO used internally by our application to work with subset of tweets exposed
+ * by Twitter search API.
+ * 
+ * @author borisa
+ *
+ */
 public class Tweet {
 
 	private final String id;

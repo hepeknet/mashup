@@ -13,6 +13,9 @@ import com.test.mashup.util.ExpiringCache;
  * Caching decorator around {@link GithubProjectFinder}. It will cache results
  * of search and keep them in memory for configured number of seconds.
  * 
+ * Again, we expect that higher level code will peform retry policy when
+ * invoking methods of this class.
+ * 
  * @author borisa
  *
  */
@@ -23,9 +26,10 @@ public class GithubProjectFinderWithCaching extends GithubProjectFinder {
 
 	private final ExpiringCache<List<GithubProject>> cache = DependenciesFactory.createCache();
 
-	private final Counter cacheHitCounter = DependenciesFactory.createMetrics().getCounter("GithubProjectsCacheHits");
+	private final Counter cacheHitCounter = DependenciesFactory.createMetrics()
+			.getCounter("GithubProjectsCacheHitsCount");
 	private final Counter cacheMissCounter = DependenciesFactory.createMetrics()
-			.getCounter("GithubProjectsCacheMisses");
+			.getCounter("GithubProjectsCacheMissesCount");
 
 	@Override
 	public List<GithubProject> findProjects(String keyword, int limit, String orderByField) {

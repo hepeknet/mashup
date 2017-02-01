@@ -16,11 +16,9 @@ public class NoOpMetricsImplementation implements Metrics {
 
 	@Override
 	public Counter getCounter(String name) {
-
 		if (name == null || name.isEmpty()) {
 			throw new IllegalArgumentException("Name must not be null or empty");
 		}
-
 		return new Counter() {
 
 			String uniqueName = name;

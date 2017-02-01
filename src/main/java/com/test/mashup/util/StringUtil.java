@@ -3,6 +3,12 @@ package com.test.mashup.util;
 import java.io.InputStream;
 import java.util.Scanner;
 
+/**
+ * Utility class for handling strings.
+ * 
+ * @author borisa
+ *
+ */
 public abstract class StringUtil {
 
 	public static String inputStreamToString(InputStream is) {
