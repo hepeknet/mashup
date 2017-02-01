@@ -10,7 +10,7 @@ import com.test.mashup.twitter.TweetFinder;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 import com.test.mashup.util.ExpiringCache;
-import com.test.mashup.util.LocalNaiveExpiringCache;
+import com.test.mashup.util.LocalExpiringCache;
 
 /**
  * Since we can not use dependency injection framework (like Guice, Spring,
@@ -51,7 +51,7 @@ public abstract class DependenciesFactory {
 	}
 
 	public static <T> ExpiringCache<T> createCache() {
-		return new LocalNaiveExpiringCache<T>();
+		return new LocalExpiringCache<T>();
 	}
 
 	public static Metrics createMetrics() {

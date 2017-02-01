@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * @author borisa
  *
  */
-public class LocalNaiveExpiringCache<T> implements ExpiringCache<T> {
+public class LocalExpiringCache<T> implements ExpiringCache<T> {
 
 	private final Logger log = Logger.getLogger(getClass().getName());
 

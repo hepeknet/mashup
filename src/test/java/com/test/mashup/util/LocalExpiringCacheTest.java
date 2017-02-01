@@ -8,11 +8,11 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Test;
 
 import com.test.mashup.util.ExpiringCache;
-import com.test.mashup.util.LocalNaiveExpiringCache;
+import com.test.mashup.util.LocalExpiringCache;
 
-public class LocalNaiveExpiringCacheTest {
+public class LocalExpiringCacheTest {
 
-	private final ExpiringCache<String> cache = new LocalNaiveExpiringCache<String>();
+	private final ExpiringCache<String> cache = new LocalExpiringCache<String>();
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullKey() {
