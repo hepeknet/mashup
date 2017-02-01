@@ -50,11 +50,16 @@ public class MashupApp {
 			.getInt(Constants.GITHUB_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME);
 
 	/*
-	 * Dependencies needed
+	 * Dependencies needed. Ideally some kind of DI would inject these to make
+	 * it eaiser to test and swap different implementations.
 	 */
 	private final GithubProjectFinder githubFinder = DependenciesFactory.createGithubProjectFinder();
 	private final TweetFinder tweetFinder = DependenciesFactory.createTweetFinder();
 
+	/*
+	 * Executor service used for parallel twitter searches - in case when
+	 * configured to do so
+	 */
 	private final ExecutorService twitterExecService;
 
 	public MashupApp() {
