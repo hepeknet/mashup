@@ -1,5 +1,6 @@
 package com.test.mashup;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.test.mashup.json.JsonParser;
@@ -43,7 +44,8 @@ public class Main {
 				} catch (final Exception exc) {
 					// in case there is temporary problem with network we want
 					// to allow user to try search again
-					LOG.severe("Caught exception while performing search. Details: " + exc.getMessage());
+					LOG.log(Level.SEVERE, "Caught exception while performing search. Details: " + exc.getMessage(),
+							exc);
 				}
 			} else {
 				break;

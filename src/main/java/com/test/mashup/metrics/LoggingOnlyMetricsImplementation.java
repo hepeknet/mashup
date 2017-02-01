@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  * @author borisa
  *
  */
-public class NoOpMetricsImplementation implements Metrics {
+public class LoggingOnlyMetricsImplementation implements Metrics {
 
 	private final Logger log = Logger.getLogger(getClass().getName());
 
@@ -60,7 +60,7 @@ public class NoOpMetricsImplementation implements Metrics {
 
 			@Override
 			public void update(long val) {
-				log.info("Updating value of " + uniqueName + " to " + val);
+				log.info("Recording new value for " + uniqueName + "=" + val);
 			}
 		};
 	}

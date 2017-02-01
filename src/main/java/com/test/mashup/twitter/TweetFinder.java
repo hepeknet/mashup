@@ -56,6 +56,9 @@ public class TweetFinder {
 			.getStringRequired(Constants.TWITTER_BEARER_REQUIRED_TOKEN_TYPE_PROPERTY_NAME);
 	private final int maxTweetsPerSearch = ConfigurationUtil.getInt(Constants.TWITTER_SEARCH_MAX_TWEETS_PROPERTY_NAME);
 
+	private final int httpConnectionTimeoutMillis = ConfigurationUtil
+			.getInt(Constants.HTTP_CONNECTION_TIMEOUT_MILLIS_PROPERTY_NAME);
+
 	private final String key = ConfigurationUtil.getStringRequired(Constants.TWITTER_AUTH_KEY_PROPERTY_NAME);
 	private final String secret = ConfigurationUtil.getStringRequired(Constants.TWITTER_AUTH_SECRET_PROPERTY_NAME);
 
@@ -153,10 +156,13 @@ public class TweetFinder {
 		 * As per https://dev.twitter.com/oauth/application-only
 		 */
 		final String bearer = getBearer(bearerUrl);
+		log.info("Found bearer token - proceeding with tweet search...");
 		final URL url = new URL(searchUrl);
 		final HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 		httpCon.setDoOutput(true);
 		httpCon.setDoInput(true);
+		httpCon.setConnectTimeout(httpConnectionTimeoutMillis);
+		httpCon.setReadTimeout(httpConnectionTimeoutMillis);
 		httpCon.setRequestMethod("GET");
 		httpCon.setRequestProperty("Authorization", "Bearer " + bearer);
 		httpCon.connect();
@@ -176,7 +182,8 @@ public class TweetFinder {
 				}
 			}
 		} catch (final IOException exc) {
-			handleHttpConnectionError(httpCon, "twitter search for [" + keyword + "]");
+			handleHttpConnectionError(httpCon,
+					"twitter search for [" + keyword + "] - url for search is [" + searchUrl + "]");
 		}
 		return httpCon.getInputStream();
 	}
@@ -188,21 +195,24 @@ public class TweetFinder {
 		// if cached then use that, in case when cached does not work anymore it
 		// will be invalidated and then we will ask twitter for new bearer token
 		if (cachedBearer == null) {
-			log.info("Was not able to find cached bearer - will try to obtain it...");
+			log.info("Was not able to find cached bearer - will try to obtain it from url [" + urlStr + "]");
 			final URL url = new URL(urlStr);
 			final HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
 			httpCon.setDoOutput(true);
 			httpCon.setDoInput(true);
+			httpCon.setConnectTimeout(httpConnectionTimeoutMillis);
+			httpCon.setReadTimeout(httpConnectionTimeoutMillis);
 			httpCon.setRequestMethod("POST");
 			final String enc = key + ":" + secret;
 			final String base64 = Base64.getEncoder().encodeToString(enc.getBytes());
 			httpCon.setRequestProperty("Authorization", "Basic " + base64);
 			httpCon.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
 			final byte[] postData = "grant_type=client_credentials".getBytes(StandardCharsets.UTF_8);
-			try (DataOutputStream wr = new DataOutputStream(httpCon.getOutputStream())) {
-				wr.write(postData);
-			}
 			try {
+				try (DataOutputStream wr = new DataOutputStream(httpCon.getOutputStream())) {
+					wr.write(postData);
+				}
+				log.info("Trying to connect to get bearer...");
 				httpCon.connect();
 				final String message = httpCon.getResponseMessage();
 				final int code = httpCon.getResponseCode();
@@ -215,30 +225,51 @@ public class TweetFinder {
 					if (bearerRequiredTokenType.equals(tokenType)) {
 						log.info("Successfully got bearer token and cached it");
 						cachedBearer = (String) parsedBody.get("access_token");
-						log.fine("Found bearer and cached its value");
+						log.info("Found bearer and cached its value for further use...");
 					} else {
-						throw new IllegalStateException("Got wrong token type for bearer [" + tokenType + "]. Expected "
-								+ bearerRequiredTokenType);
+						throw new IllegalStateException("Got wrong token type for bearer [" + tokenType
+								+ "]. Expected it to be " + bearerRequiredTokenType
+								+ ". Either configuration is bad or Twitter API changed!");
 					}
 				} else {
 					throw new IllegalStateException(
 							"Did not find appropriate data in response - unable to get bearer token!");
 				}
 			} catch (final IOException exc) {
-				handleHttpConnectionError(httpCon, "bearer fetch");
+				handleHttpConnectionError(httpCon, "bearer fetch from url [" + urlStr + "]");
 			}
 		}
 		return cachedBearer;
 	}
 
+	/*
+	 * Have to make sure we can not fail in this method whatever happens
+	 */
 	private void handleHttpConnectionError(HttpURLConnection conn, String phase) throws IOException {
-		final String message = conn.getResponseMessage();
-		String errorDescription = null;
-		if (conn.getErrorStream() != null) {
-			errorDescription = StringUtil.inputStreamToString(conn.getErrorStream());
+		String errMessage = null;
+		try {
+			final String message = conn.getResponseMessage();
+			log.info("Processing error message for " + conn + " and phase " + phase + ", response message is "
+					+ message);
+			String errorDescription = "";
+			if (conn.getErrorStream() != null) {
+				errorDescription = StringUtil.inputStreamToString(conn.getErrorStream());
+			}
+			final int code = conn.getResponseCode();
+			errMessage = "Caught exception performing " + phase + ". Error: " + message + ", error code:" + code
+					+ ", description: " + errorDescription;
+		} catch (final Exception exc) {
+			/*
+			 * this can happen if there is no network connectivity or URL set in
+			 * configuration does not exist. We still want to report something
+			 * to user.
+			 */
+			final String msg = "Was not able to create connection for " + phase + ". Network or configuration problem!";
+			log.severe(msg);
+			throw new RuntimeException(msg, exc);
 		}
-		throw new RuntimeException(
-				"Caught exception performing " + phase + ". Error: " + message + ", description: " + errorDescription);
+		log.severe(errMessage);
+		throw new RuntimeException(errMessage);
 	}
 
 }

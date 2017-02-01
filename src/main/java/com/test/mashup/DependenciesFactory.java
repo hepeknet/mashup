@@ -5,7 +5,7 @@ import com.test.mashup.github.GithubProjectFinderWithCaching;
 import com.test.mashup.json.JsonParser;
 import com.test.mashup.json.SimpleNativeJsonParser;
 import com.test.mashup.metrics.Metrics;
-import com.test.mashup.metrics.NoOpMetricsImplementation;
+import com.test.mashup.metrics.LoggingOnlyMetricsImplementation;
 import com.test.mashup.twitter.TweetFinder;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
@@ -55,7 +55,7 @@ public abstract class DependenciesFactory {
 	}
 
 	public static Metrics createMetrics() {
-		return new NoOpMetricsImplementation();
+		return new LoggingOnlyMetricsImplementation();
 	}
 
 }

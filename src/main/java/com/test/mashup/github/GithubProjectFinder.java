@@ -130,6 +130,7 @@ public class GithubProjectFinder {
 					}
 					final long totalTimeMs = System.currentTimeMillis() - startTime;
 					searchStatistics.update(totalTimeMs);
+					log.info("Found " + results.size() + " github projects based on search [" + keyword + "]");
 				} else {
 					githubSearchFailures.inc();
 					throw new RuntimeException(

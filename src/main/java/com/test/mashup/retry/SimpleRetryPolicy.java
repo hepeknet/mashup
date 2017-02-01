@@ -51,7 +51,7 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 		Exception lastThrownException = null;
 		// try to recover and either return result in case of success or last
 		// thrown Exception in case of failure
-		for (int i = 0; i < maxAttempts; i++) {
+		for (int i = 1; i <= maxAttempts; i++) {
 			try {
 				v = e.call();
 				log.fine("Successfully executed " + name + ". Total attempts = " + i);

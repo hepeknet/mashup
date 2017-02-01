@@ -42,4 +42,6 @@ public interface Constants {
 
 	String GITHUB_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME = "github_search_retry_fixed_backoff_millis";
 
+	String HTTP_CONNECTION_TIMEOUT_MILLIS_PROPERTY_NAME = "http_connection_timeout_millis";
+
 }

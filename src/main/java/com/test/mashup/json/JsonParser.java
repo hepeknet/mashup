@@ -36,7 +36,8 @@ public interface JsonParser {
 	Map<String, Object> parse(String source);
 
 	/**
-	 * Parses given input String as JSON and returns <tt>Map</tt>
+	 * Parses given input String as JSON and returns <tt>Map</tt>. It will also
+	 * close provided InputStream.
 	 * 
 	 * @param is
 	 *            - stream from which to read input JSON string. Must not be
