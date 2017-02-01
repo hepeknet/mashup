@@ -49,6 +49,11 @@ POTENTIAL IMPROVEMENTS
 - Use SLF4J for logging for improved performance and richer features
 - Probably move configuration to Zookeeper or Consul maybe - currently using property files is not flexible enough, especially for distributed systems
 
+OTHER THINGS THAT SHOULD BE PART OF PRODUCTION READY SOFTWARE
+
+- Documentation, especially if we are exposing APIs remotely or exposing some client library. This is currently not the case for this project but it could expand.
+	If we are providing user library then API should be clearly separated (separate jar) from implementation.
+
 INTERNAL - TODO: 
 
 - at least one integration test
