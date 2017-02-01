@@ -35,7 +35,9 @@ public abstract class ConfigurationUtil {
 					props.load(is);
 				}
 			} else {
-				LOG.info("Configuration will be loaded from classpath");
+				LOG.info(
+						"Configuration will be loaded from classpath - was not able to find overriding system property ["
+								+ Constants.CONFIGURATION_LOCATION_SYS_PROPERTY_NAME + "]");
 				props.load(ConfigurationUtil.class.getResourceAsStream("/mashup.properties"));
 			}
 		} catch (final IOException ie) {
@@ -88,7 +90,7 @@ public abstract class ConfigurationUtil {
 	 *            null or empty.
 	 * @return the value associated with configuration property name. Throws
 	 *         exception in case configuration property does not exist or can
-	 *         not be converted into integer.
+	 *         not be converted into integer value.
 	 */
 	public static int getInt(String propName) {
 		final String strValue = getString(propName);
