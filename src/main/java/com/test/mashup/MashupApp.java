@@ -51,7 +51,7 @@ public class MashupApp {
 
 	/*
 	 * Dependencies needed. Ideally some kind of DI would inject these to make
-	 * it eaiser to test and swap different implementations.
+	 * it easier to test and swap different implementations.
 	 */
 	private final GithubProjectFinder githubFinder = DependenciesFactory.createGithubProjectFinder();
 	private final TweetFinder tweetFinder = DependenciesFactory.createTweetFinder();
@@ -95,14 +95,18 @@ public class MashupApp {
 
 		final RetryPolicy<List<Tweet>> twitterSearchRetryPolicy = new SimpleRetryPolicy<>("twitter-search",
 				twitterSearchRetryMaxAttempts, twitterSearchRetryBackoffMillis);
+		// now we choose whether to go parallel or not
+		// based on configuration provided
 		if (twitterExecService != null) {
-			log.info("Will use " + twitterSearchThreadPoolSize + " threads for twitter search execution in parallel");
+			log.info("Will use " + twitterSearchThreadPoolSize + " threads for executing twitter search");
 			result = doExecuteParallel(projects, twitterSearchRetryPolicy);
 		} else {
-			log.info("Using single-threaded execution");
-			result = doExecute(projects, twitterSearchRetryPolicy);
+			log.info("Using single-threaded execution for twitter search");
+			result = doExecuteSingleThreaded(projects, twitterSearchRetryPolicy);
 		}
-		log.fine("Successfully found results " + result);
+		if (log.isLoggable(Level.FINE)) {
+			log.fine("Successfully found results " + result);
+		}
 		return result;
 	}
 
@@ -133,7 +137,7 @@ public class MashupApp {
 	/*
 	 * Executes all searches in a single thread, one by one.
 	 */
-	private OutputResult doExecute(List<GithubProject> projects, RetryPolicy<List<Tweet>> rPolicy) {
+	private OutputResult doExecuteSingleThreaded(List<GithubProject> projects, RetryPolicy<List<Tweet>> rPolicy) {
 		final List<GithubProjectWithTweets> projectsWithTweets = new LinkedList<>();
 		projects.forEach(p -> {
 			// execute twitter search with retry policy

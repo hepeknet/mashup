@@ -107,6 +107,9 @@ public class TweetFinder {
 				 */
 				final Map<String, Object> mapTweets = parser.parse(responseBody);
 				final Object statuses = mapTweets.get("statuses");
+				if (log.isLoggable(Level.FINE)) {
+					log.fine("Statuses object is " + statuses);
+				}
 				if (statuses != null) {
 					final List<Map<String, Object>> itemList = (List<Map<String, Object>>) statuses;
 					final List<Tweet> tweets = new LinkedList<>();
@@ -220,7 +223,7 @@ public class TweetFinder {
 				if (httpCon.getInputStream() != null) {
 					final String body = StringUtil.inputStreamToString(httpCon.getInputStream());
 					final Map<String, Object> parsedBody = parser.parse(body);
-					log.info("Checking token type");
+					log.info("Checking token type...");
 					final String tokenType = (String) parsedBody.get("token_type");
 					if (bearerRequiredTokenType.equals(tokenType)) {
 						log.info("Successfully got bearer token and cached it");
