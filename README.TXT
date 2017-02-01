@@ -35,9 +35,9 @@ POTENTIAL IMPROVEMENTS
 - Introduce proper monitoring and exposing metrics. Some 3PP would be best for this.
 - Introduce proper system testing using Docker and some scripting language (like Groovy)
 - Use SLF4J for logging for improved performance and richer features
+- Probably move configuration to Zookeeper or Consul maybe - currently using property files is not flexible enough, especially for distributed systems
 
 INTERNAL - TODO: 
 
 - at least one integration test
-- add hystrix
 

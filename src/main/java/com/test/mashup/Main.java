@@ -105,12 +105,15 @@ public class Main {
 	 *            Github projects found by keyword
 	 * @param es
 	 *            ExecutoService to be used for parallel execution
+	 * @param rPolicy
+	 *            - retry policy to be used for twitter search
 	 * @return output results
 	 */
 	private static OutputResult doExecuteParallel(List<GithubProject> projects, ExecutorService es,
 			RetryPolicy<List<Tweet>> rPolicy) {
 		final List<GithubProjectWithTweets> allProjects = projects.stream()
 				.map(p -> CompletableFuture.supplyAsync(() -> {
+					// execute with retry policy
 					final List<Tweet> tweets = rPolicy.execute(() -> tweetFinder.searchTwitter(p.getName()));
 					final GithubProjectWithTweets gt = new GithubProjectWithTweets();
 					gt.setProject(p);
@@ -127,6 +130,8 @@ public class Main {
 	 * 
 	 * @param projects
 	 *            Github projects found by keyword
+	 * @param rPolicy
+	 *            - retry policy to be used for twitter search
 	 * @return output results
 	 */
 	private static OutputResult doExecute(List<GithubProject> projects, RetryPolicy<List<Tweet>> rPolicy) {
