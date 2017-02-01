@@ -11,11 +11,12 @@ import java.util.logging.Logger;
 
 /**
  * Very naive implementation of local expiring cache. Ideally we would use some
- * 3PP instead of this.
+ * 3PP instead of this implementation (like Guava, EHCache, Hazelcast,
+ * Infinispan...)
  * 
- * This implementation uses {@code DelayQueue} for expiration. No need for
- * background threads to clear the cache since clearing is done on every get
- * request - which is a good compromise between speed and accuracy.
+ * This implementation uses {@code DelayQueue} for expiration. There is no need
+ * for background threads to clear the cache periodically since clearing is done
+ * on every get request - which is a good compromise between speed and accuracy.
  * 
  * Also, cache will self-protect by limiting number of items that can be cached
  * at any point in time. This will have performance impact but will prevent OOM
@@ -65,7 +66,9 @@ public class LocalExpiringCache<T> implements ExpiringCache<T> {
 
 	/*
 	 * In case when cache grows too big we clear it. This will hurt performance
-	 * but will keep application healthy.
+	 * but will keep application healthy. Improvement would be to remove only
+	 * oldest value from cache but that would require a lot of code and it is
+	 * better to switch to 3PP to do this.
 	 */
 	private void checkMaxCacheSizeAndPurgeIfNeeded() {
 		if (cache.size() > maxCacheSize) {
@@ -79,8 +82,9 @@ public class LocalExpiringCache<T> implements ExpiringCache<T> {
 	@Override
 	public T get(String key) {
 		if (key == null || key.isEmpty()) {
-			return null;
+			throw new IllegalArgumentException("Key must not be null or empty string");
 		}
+		// first remove expired keys/values
 		removeExpiredKeys();
 		return cache.get(key);
 	}
@@ -92,6 +96,7 @@ public class LocalExpiringCache<T> implements ExpiringCache<T> {
 	private void removeExpiredKeys() {
 		log.fine("Removing expired keys");
 		final List<ExpiringElement> expiredKeys = new LinkedList<>();
+		// atomically find expired keys and drain them to local collection
 		validKeys.drainTo(expiredKeys);
 		for (final ExpiringElement ee : expiredKeys) {
 			final String eKey = ee.key;

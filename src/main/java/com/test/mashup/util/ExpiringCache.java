@@ -18,7 +18,9 @@ import java.util.concurrent.TimeUnit;
 public interface ExpiringCache<T> {
 
 	/**
-	 * Caches value and associates expiration period with it.
+	 * Caches value and associates expiration period with it. After expiration
+	 * period key and value will not be available, any retrieval by given key
+	 * will return null value.
 	 * 
 	 * @param key
 	 *            under which to remember cached value. Must not be null or
@@ -27,14 +29,15 @@ public interface ExpiringCache<T> {
 	 *            the value to cache
 	 * @param expiration
 	 *            after what period cached value will be removed from cache. If
-	 *            this value is <=0 then value will not be cached
+	 *            this value is <=0 then value will not be cached at all
 	 * @param unit
 	 *            then unit of time used for expiration. Must not be null.
 	 */
 	void put(String key, T value, long expiration, TimeUnit unit);
 
 	/**
-	 * Returns the value associated with given key.
+	 * Returns the value associated with given key. If the key/value par was not
+	 * cached returns null. If the key/value pair expired returns null.
 	 * 
 	 * @param key
 	 *            under which value has been cached. Must not be null or empty

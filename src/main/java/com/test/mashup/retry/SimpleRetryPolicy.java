@@ -6,7 +6,8 @@ import java.util.logging.Logger;
 
 /**
  * Simple retry policy with backoff and maximum number of attempts. New policies
- * can be added using exponential backoff.
+ * can be added using exponential backoff for example, compensation actions in
+ * case of failure etc.
  * 
  * Ideally we would use some external library for this - like Spring.
  * 

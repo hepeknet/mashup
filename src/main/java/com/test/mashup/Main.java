@@ -8,7 +8,9 @@ import com.test.mashup.metrics.Histogram;
 /**
  * Main entry point into application. Ideally this should be replaced with some
  * kind of REST endpoint (Jetty, Spring boot...) if this is to be exposed as
- * some kind of microservice and deployed in distributed fashion.
+ * some kind of microservice and deployed in distributed fashion where we can
+ * have full HA and load-balanced environment with potentially multiple versions
+ * of the same service running in production.
  *
  * @author borisa
  *
@@ -17,7 +19,10 @@ public class Main {
 
 	private static final Logger LOG = Logger.getLogger(Main.class.getName());
 
-	private static JsonParser parser = DependenciesFactory.createParser();
+	/*
+	 * Needed to convert search results into JSON format
+	 */
+	private static final JsonParser parser = DependenciesFactory.createParser();
 
 	/*
 	 * Tracking and exposing internal statistics
@@ -32,8 +37,14 @@ public class Main {
 			final String line = System.console().readLine();
 			if (line != null && !line.trim().isEmpty()) {
 				final String trimmed = line.trim();
-				LOG.info("Entered keyword is [" + trimmed + "]");
-				searchAndPrintResult(mashupApp, trimmed);
+				try {
+					LOG.info("Entered keyword is [" + trimmed + "]");
+					searchAndPrintResult(mashupApp, trimmed);
+				} catch (final Exception exc) {
+					// in case there is temporary problem with network we want
+					// to allow user to try search again
+					LOG.severe("Caught exception while performing search. Details: " + exc.getMessage());
+				}
 			} else {
 				break;
 			}

@@ -3,9 +3,13 @@ package com.test.mashup.metrics;
 import java.util.logging.Logger;
 
 /**
- * This implementation is no-op - does not do anything. Here is only to provide
- * API to users and show the idea. Implementation could be done by using some of
- * 3PPs or directly exposing data to logging system or JMX.
+ * This implementation is no-op - does not do anything except logging
+ * information. This implementation is here only to provide API to users and
+ * show the idea. Implementation could be done by using some of 3PPs (like the
+ * one provided by Dropwizard.io) or directly exposing data to logging system or
+ * JMX.
+ * 
+ * I did not have enough time to provide more useful implementation.
  * 
  * @author borisa
  *
