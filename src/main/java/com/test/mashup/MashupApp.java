@@ -19,6 +19,16 @@ import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 import com.test.mashup.util.NamedThreadFactory;
 
+/**
+ * Entry point to our functionality. Orchestrates other parts of application,
+ * deals with recovery and retries, decides whether to use parallel search or
+ * not.
+ * 
+ * Main method (or potentially REST endpoint) use this to do all the work.
+ * 
+ * @author borisa
+ *
+ */
 public class MashupApp {
 
 	private final Logger log = Logger.getLogger(getClass().getName());
@@ -56,10 +66,15 @@ public class MashupApp {
 		}
 	}
 
-	/*
+	/**
 	 * Decides what kind of search to perform (based on configuration values)
 	 * and executes that search. Creates appropriate retry policy that will be
 	 * used by main search functionality.
+	 * 
+	 * @param keyword
+	 *            the keyword used for search. Must not be null or empty.
+	 * @return output result. Never returns null. Throws exception in case it
+	 *         was not able to retrieve results after all retries.
 	 */
 	public OutputResult executeSearch(String keyword) {
 		if (keyword == null || keyword.isEmpty()) {
@@ -128,6 +143,10 @@ public class MashupApp {
 		return result;
 	}
 
+	/**
+	 * Shutdown all internal resources. Must be invoked before shutting down
+	 * application (JVM).
+	 */
 	public void shutdown() {
 		if (twitterExecService != null) {
 			twitterExecService.shutdown();
