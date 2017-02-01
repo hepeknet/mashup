@@ -6,9 +6,6 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.test.mashup.json.JsonParser;
-import com.test.mashup.json.SimpleNativeJsonParser;
-
 public class SimpleNativeJsonParserTest {
 
 	private final JsonParser parser = new SimpleNativeJsonParser();
@@ -30,6 +27,14 @@ public class SimpleNativeJsonParserTest {
 		sp.setY("ratm");
 		final String json = parser.toJson(sp);
 		assertEquals("{\"x\" : 42, \"y\" : \"ratm\"}", json);
+	}
+
+	@Test
+	public void testToJsonPojoNull() {
+		final SimplePojo sp = new SimplePojo();
+		sp.setX(42);
+		final String json = parser.toJson(sp);
+		assertEquals("{\"x\" : 42, \"y\" : null}", json);
 	}
 
 }

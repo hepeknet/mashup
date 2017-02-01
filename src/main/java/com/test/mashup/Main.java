@@ -33,6 +33,9 @@ public class Main {
 
 	private static final Logger LOG = Logger.getLogger(Main.class.getName());
 
+	/*
+	 * Configuration properties
+	 */
 	private static final int twitterSearchThreadPoolSize = ConfigurationUtil
 			.getInt(Constants.TWITTER_SEARCH_THREAD_POOL_SIZE_PROPERTY_NAME);
 
@@ -46,10 +49,16 @@ public class Main {
 	private static final int githubSearchRetryBackoffMillis = ConfigurationUtil
 			.getInt(Constants.GITHUB_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME);
 
+	/*
+	 * Dependencies needed
+	 */
 	private static GithubProjectFinder githubFinder = DependenciesFactory.createGithubProjectFinder();
 	private static TweetFinder tweetFinder = DependenciesFactory.createTweetFinder();
 	private static JsonParser parser = DependenciesFactory.createParser();
 
+	/*
+	 * Tracking and exposing internal statistics
+	 */
 	private static Histogram appStats = DependenciesFactory.createMetrics()
 			.getHistogram("MashupStatisticsExecutionTimeMs");
 
@@ -64,7 +73,7 @@ public class Main {
 	}
 
 	public static void main(String[] args) throws Exception {
-		searchAndPrintResult("reactive");
+		searchAndPrintResult("basdfasdgdasgashadshsahashas");
 	}
 
 	/*
@@ -79,6 +88,7 @@ public class Main {
 		final long totalMs = System.currentTimeMillis() - start;
 		appStats.update(totalMs);
 		System.out.println("========================================================");
+		System.out.println("In total found " + result.getProjects().size() + " projects for keyword [" + keyword + "]");
 		System.out.println("Mashup for keyword [" + keyword + "] is:");
 		System.out.println("========================================================");
 		System.out.println(json);
@@ -95,7 +105,8 @@ public class Main {
 		final RetryPolicy<List<GithubProject>> githubSearchRetryPolicy = new SimpleRetryPolicy<>("github-search",
 				githubSearchRetryMaxAttempts, githubSearchRetryBackoffMillis);
 		final List<GithubProject> projects = githubSearchRetryPolicy.execute(() -> githubFinder.findProjects(keyword));
-		OutputResult result = null;
+
+		OutputResult result = new OutputResult();
 
 		final RetryPolicy<List<Tweet>> twitterSearchRetryPolicy = new SimpleRetryPolicy<>("twitter-search",
 				twitterSearchRetryMaxAttempts, twitterSearchRetryBackoffMillis);

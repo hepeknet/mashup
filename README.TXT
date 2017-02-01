@@ -34,6 +34,7 @@ POTENTIAL IMPROVEMENTS
 - Introduce 3PPs and reduce code doing plumbing things like: JSON parsing and conversion, caching
 - Introduce proper monitoring and exposing metrics. Some 3PP would be best for this.
 - Introduce proper system testing using Docker and some scripting language (like Groovy)
+- Introduce some kind of failure injection for more robust system tests (like ChaosMonkey)
 - Use SLF4J for logging for improved performance and richer features
 - Probably move configuration to Zookeeper or Consul maybe - currently using property files is not flexible enough, especially for distributed systems
 

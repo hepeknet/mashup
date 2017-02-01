@@ -2,6 +2,7 @@ package com.test.mashup.json;
 
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -124,6 +125,7 @@ public class SimpleNativeJsonParser implements JsonParser {
 		if (isBuiltInJavaClass) {
 			throw new UnsupportedOperationException("Unable to convert type " + obj.getClass().getName() + " to JSON!");
 		} else {
+			log.info("Converting " + obj + " as POJO to json");
 			return pojoToJson(obj);
 		}
 	}
@@ -143,19 +145,22 @@ public class SimpleNativeJsonParser implements JsonParser {
 		final StringBuilder sb = new StringBuilder("{");
 		try {
 
-			final Map<String, Object> fieldsAndValues = Arrays
+			final List<PropertyDescriptor> validPropertyDescriptors = Arrays
 					.asList(Introspector.getBeanInfo(obj.getClass()).getPropertyDescriptors()).stream()
 					// filter out properties with setters only
 					.filter(pd -> Objects.nonNull(pd.getReadMethod()))
 					// filter out getClass method from java.lang.Object
-					.filter(pd -> pd.getReadMethod().getName() != "getClass")
-					.collect(Collectors.toMap(pd -> pd.getDisplayName(), pd -> {
-						try {
-							return pd.getReadMethod().invoke(obj);
-						} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-							throw new IllegalStateException(e);
-						}
-					}));
+					.filter(pd -> pd.getReadMethod().getName() != "getClass").collect(Collectors.toList());
+			final Map<String, Object> fieldsAndValues = new HashMap<>();
+			validPropertyDescriptors.forEach(pd -> {
+				try {
+					final String name = pd.getDisplayName();
+					final Object value = pd.getReadMethod().invoke(obj);
+					fieldsAndValues.put(name, value);
+				} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+					throw new IllegalStateException(e);
+				}
+			});
 			fieldsAndValues.forEach((k, v) -> {
 				final String valueToJson = toJson(v);
 				sb.append("\"").append(k).append("\" : ").append(valueToJson).append(", ");
@@ -164,6 +169,8 @@ public class SimpleNativeJsonParser implements JsonParser {
 			sb.delete(sb.length() - 2, sb.length());
 		} catch (final IntrospectionException e) {
 			throw new IllegalStateException("Exception while introspecting for json generation", e);
+		} catch (final Exception exc) {
+			throw new RuntimeException("Problem while converting " + obj + " to json", exc);
 		}
 		sb.append("}");
 		return sb.toString();
