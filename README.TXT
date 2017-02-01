@@ -1,7 +1,7 @@
 INTRO
 
 I decided to use Java because I am much faster in it and given the fact that I can not use 3PP libraries I had
-to be very fast and productive in order to implement all features but also to have good code quality.
+to be very fast and productive in order to implement all required features and also to have good code quality.
 
 I did use some of Java 8 features (lambdas, CompletableFutures) - which are functionally very similar to Scala.
 
@@ -9,17 +9,23 @@ I did use some of Java 8 features (lambdas, CompletableFutures) - which are func
 REQUIREMENTS
 
 Oracle JDK 1.8.0_60 at least, the best is to use latest one available - 1.8.0_100 or higher! If you use older version then
-not everything will work because I rely on some latest feature to implement Json parsing without using any
-3PPs.
+not everything will work because I rely on some latest feature (parts of Javascript scripting engine shipped with JDK) 
+to implement Json parsing without using any 3PPs.
+
+If I did not do this I would have to write my own parser, deal with ASTs and different corner cases and it would easily
+require few days just to do that.
 
 Usually I would not depend on latest JVM version but in order to avoid writing my own JSON parser I decided to do so.
 One of limitations given to me was to use JDK only but no other 3PP library.
 
+I chose to depend on JDK 1.8 because it has functional features and also depending on specific version of dependency
+is not a problem anymore in the world of microservices and containers (Docker).
+
 CONFIGURATION
 
-It is required to change first two configuration values in src/main/resources/mashup.properties!
+It is MANDATORY to change first two configuration values in src/main/resources/mashup.properties!
 
-Other values can be modified also but this is not needed in order to use application.
+Other configuration values can also be modified but this is not needed in order to use application.
 
 HOW TO RUN?
 
@@ -30,15 +36,19 @@ Java must be available on the PATH. If not then please modify startMashup.sh scr
 Execute these two commands to run the application.
 
 mvn clean package
+
 ./startMashup.sh
 
-In case that shell scripts can not be executed on your system (if you use Windows) simply copy paste command from 
+In case that shell scripts can not be executed on your system (maybe you use Windows) simply copy paste command from 
 startMashup.sh into your terminal (command line).
 
 TESTS
 
 JUnit tests are executed automatically during Maven build.
+
 Integration tests can be executed in the following way:
+
+- TODO
 
 POTENTIAL IMPROVEMENTS
 
