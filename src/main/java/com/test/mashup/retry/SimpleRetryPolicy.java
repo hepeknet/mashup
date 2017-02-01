@@ -47,7 +47,7 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 		log.fine("Executing call for " + name + ", maxAttempts=" + maxAttempts + ", backoff="
 				+ fixedBackOffPeriodMillis);
 		V v = null;
-		Exception lastThrowsException = null;
+		Exception lastThrownException = null;
 		// try to recover and either return result in case of success or last
 		// thrown Exception in case of failure
 		for (int i = 0; i < maxAttempts; i++) {
@@ -56,10 +56,12 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 				log.fine("Successfully executed " + name + ". Total attempts = " + i);
 				return v;
 			} catch (final Exception exc) {
-				log.fine("Caught exception for " + name + ", maxAttempts=" + maxAttempts + ", currentAttempt=" + i);
-				lastThrowsException = exc;
+				log.info("Caught exception for " + name + ", maxAttempts=" + maxAttempts + ", currentAttempt=" + i);
+				lastThrownException = exc;
 				if (fixedBackOffPeriodMillis > 0) {
 					try {
+						log.fine("Waiting for " + fixedBackOffPeriodMillis + " ms - retry policy " + name
+								+ ", attemptNumber = " + i);
 						TimeUnit.MILLISECONDS.sleep(fixedBackOffPeriodMillis);
 					} catch (final InterruptedException e1) {
 						// do nothing here
@@ -67,7 +69,8 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 				}
 			}
 		}
-		throw new RetryFailedException(name, lastThrowsException);
+		throw new RetryFailedException(
+				"Failed to execute retry policy " + name + " after " + maxAttempts + " attempts!", lastThrownException);
 	}
 
 }

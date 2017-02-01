@@ -62,17 +62,21 @@ public class Main {
 	private static Histogram appStats = DependenciesFactory.createMetrics()
 			.getHistogram("MashupStatisticsExecutionTimeMs");
 
-	public static void main1(String[] args) throws Exception {
+	public static void main(String[] args) throws Exception {
 		String line = null;
 		do {
 			printUsage();
 			line = System.console().readLine();
-			LOG.info("Entered keyword is " + line);
-			searchAndPrintResult(line);
-		} while (line != null && !line.isEmpty());
+			if (line != null && !line.trim().isEmpty()) {
+				final String trimmed = line.trim();
+				LOG.info("Entered keyword is [" + trimmed + "]");
+				searchAndPrintResult(trimmed);
+			}
+		} while (line != null && !line.trim().isEmpty());
+		System.out.println("Exiting...");
 	}
 
-	public static void main(String[] args) throws Exception {
+	public static void main1(String[] args) throws Exception {
 		searchAndPrintResult("basdfasdgdasgashadshsahashas");
 	}
 
@@ -168,7 +172,7 @@ public class Main {
 	}
 
 	private static void printUsage() {
-		System.out.println("Enter keyword to search for (enter to exit):");
+		System.out.println("\n\nEnter keyword to search for (enter to exit):");
 	}
 
 }

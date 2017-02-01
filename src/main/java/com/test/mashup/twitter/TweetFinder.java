@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.LinkedList;
@@ -48,14 +49,15 @@ public class TweetFinder {
 	/*
 	 * Configuration parameters
 	 */
-	private final String baseSearchUrl = ConfigurationUtil.getString(Constants.TWITTER_SEARCH_BASE_URL_PROPERTY_NAME);
-	private final String bearerUrl = ConfigurationUtil.getString(Constants.TWITTER_BEARER_URL_PROPERTY_NAME);
+	private final String baseSearchUrl = ConfigurationUtil
+			.getStringRequired(Constants.TWITTER_SEARCH_BASE_URL_PROPERTY_NAME);
+	private final String bearerUrl = ConfigurationUtil.getStringRequired(Constants.TWITTER_BEARER_URL_PROPERTY_NAME);
 	private final String bearerRequiredTokenType = ConfigurationUtil
-			.getString(Constants.TWITTER_BEARER_REQUIRED_TOKEN_TYPE_PROPERTY_NAME);
+			.getStringRequired(Constants.TWITTER_BEARER_REQUIRED_TOKEN_TYPE_PROPERTY_NAME);
 	private final int maxTweetsPerSearch = ConfigurationUtil.getInt(Constants.TWITTER_SEARCH_MAX_TWEETS_PROPERTY_NAME);
 
-	private final String key = ConfigurationUtil.getString(Constants.TWITTER_AUTH_KEY_PROPERTY_NAME);
-	private final String secret = ConfigurationUtil.getString(Constants.TWITTER_AUTH_SECRET_PROPERTY_NAME);
+	private final String key = ConfigurationUtil.getStringRequired(Constants.TWITTER_AUTH_KEY_PROPERTY_NAME);
+	private final String secret = ConfigurationUtil.getStringRequired(Constants.TWITTER_AUTH_SECRET_PROPERTY_NAME);
 
 	/*
 	 * Parser for JSON
@@ -69,52 +71,11 @@ public class TweetFinder {
 			.getHistogram("TwitterSearchExecutionTimeStats");
 	private final Counter tweetSearchFailures = DependenciesFactory.createMetrics().getCounter("TwitterSearchFailures");
 
-	/*
-	 * We can cache bearer once we obtain it. It is valid until it is
-	 * invalidated manually - as per Twitter API. We detect that in our code and
-	 * try to obtain it again.
-	 */
-	private volatile String cachedBearer = null;
-
-	private InputStream tryToGetTweets(String keyword, boolean shouldRetry) throws IOException {
-		final String searchUrl = baseSearchUrl + keyword + "&count=" + maxTweetsPerSearch;
-		log.info("Tweet search url is " + searchUrl);
-		/*
-		 * As per https://dev.twitter.com/oauth/application-only
-		 */
-		final String bearer = getBearer(bearerUrl);
-		final URL url = new URL(searchUrl);
-		final HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
-		httpCon.setDoOutput(true);
-		httpCon.setDoInput(true);
-		httpCon.setRequestMethod("GET");
-		httpCon.setRequestProperty("Authorization", "Bearer " + bearer);
-		httpCon.connect();
-		try {
-			final int httpCode = httpCon.getResponseCode();
-			log.info("Response code for twitter search [" + keyword + "] is " + httpCode);
-			/*
-			 * As per twitter API if bearer has been invalidated we will get 401
-			 * code back, so we invalidate cached bearer and try to obtain new
-			 * one.
-			 */
-			if (httpCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
-				log.info("Got unauthorized response when searching for tweets. Will try to obtain bearer again!");
-				cachedBearer = null;
-				if (shouldRetry) {
-					return tryToGetTweets(keyword, false);
-				}
-			}
-		} catch (final IOException exc) {
-			handleHttpConnectionError(httpCon, "twitter search for [" + keyword + "]");
-		}
-		return httpCon.getInputStream();
-	}
-
 	/**
 	 * Searches twitter based on given keyword.
 	 * 
-	 * TODO: add pagination support
+	 * TODO: add pagination support based on Twitter API and expose pagination
+	 * support to users of this class.
 	 * 
 	 * @param keyword
 	 *            to use for search. Must not be null or empty string.
@@ -125,7 +86,7 @@ public class TweetFinder {
 		if (keyword == null) {
 			throw new IllegalArgumentException("Keyword must not be null");
 		}
-		if (keyword.isEmpty()) {
+		if (keyword.trim().isEmpty()) {
 			throw new IllegalArgumentException("Keyword must not be empty string");
 		}
 		try {
@@ -176,6 +137,48 @@ public class TweetFinder {
 			tweetSearchFailures.inc();
 			throw new IllegalStateException("IOException while searching twitter for [" + keyword + "]", ie);
 		}
+	}
+
+	/*
+	 * We can cache bearer once we obtain it. It is valid until it is
+	 * invalidated manually - as per Twitter API. We detect that in our code and
+	 * try to obtain it again.
+	 */
+	private volatile String cachedBearer = null;
+
+	private InputStream tryToGetTweets(String keyword, boolean shouldRetry) throws IOException {
+		final String searchUrl = baseSearchUrl + URLEncoder.encode(keyword) + "&count=" + maxTweetsPerSearch;
+		log.info("Tweet search url is " + searchUrl);
+		/*
+		 * As per https://dev.twitter.com/oauth/application-only
+		 */
+		final String bearer = getBearer(bearerUrl);
+		final URL url = new URL(searchUrl);
+		final HttpURLConnection httpCon = (HttpURLConnection) url.openConnection();
+		httpCon.setDoOutput(true);
+		httpCon.setDoInput(true);
+		httpCon.setRequestMethod("GET");
+		httpCon.setRequestProperty("Authorization", "Bearer " + bearer);
+		httpCon.connect();
+		try {
+			final int httpCode = httpCon.getResponseCode();
+			log.info("Response code for twitter search [" + keyword + "] is " + httpCode);
+			/*
+			 * As per twitter API if bearer has been invalidated we will get 401
+			 * code back, so we invalidate cached bearer and try to obtain new
+			 * one.
+			 */
+			if (httpCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+				log.info("Got unauthorized response when searching for tweets. Will try to obtain bearer again!");
+				cachedBearer = null;
+				if (shouldRetry) {
+					return tryToGetTweets(keyword, false);
+				}
+			}
+		} catch (final IOException exc) {
+			handleHttpConnectionError(httpCon, "twitter search for [" + keyword + "]");
+		}
+		return httpCon.getInputStream();
 	}
 
 	/*

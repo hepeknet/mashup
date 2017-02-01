@@ -62,6 +62,25 @@ public abstract class ConfigurationUtil {
 	}
 
 	/**
+	 * Returns the value of configuration property as String. Configuration
+	 * value must exist and be non-empty string.
+	 * 
+	 * @param propName
+	 *            the name for which configuration value is needed. Must not be
+	 *            null or empty.
+	 * @return the value associated with configuration property name. Throws
+	 *         exception in case when value does not exist or is empty string.
+	 */
+	public static String getStringRequired(String propName) {
+		final String val = getString(propName);
+		if (val == null || val.trim().isEmpty()) {
+			throw new IllegalStateException("Required configuration property [" + propName
+					+ "] does not have assigned non-empty string value!");
+		}
+		return val;
+	}
+
+	/**
 	 * Returns the value of configuration property as int.
 	 * 
 	 * @param propName

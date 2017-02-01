@@ -3,6 +3,7 @@ package com.test.mashup.github;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,7 @@ public class GithubProjectFinder {
 	/*
 	 * Configuration properties
 	 */
-	private final String baseUrl = ConfigurationUtil.getString(Constants.GITHUB_SEARCH_BASE_URL_PROPERTY_NAME);
+	private final String baseUrl = ConfigurationUtil.getStringRequired(Constants.GITHUB_SEARCH_BASE_URL_PROPERTY_NAME);
 	private final int projectSearchLimit = ConfigurationUtil
 			.getInt(Constants.GITHUB_SEARCH_MAX_PROJECTS_LIMIT_PROPERTY_NAME);
 	private final String sortField = ConfigurationUtil
@@ -54,7 +55,7 @@ public class GithubProjectFinder {
 		return findProjects(keyword, projectSearchLimit);
 	}
 
-	public List<GithubProject> findProjects(String keyword, int limit) {
+	private List<GithubProject> findProjects(String keyword, int limit) {
 		return findProjects(keyword, limit, sortField);
 	}
 
@@ -70,7 +71,7 @@ public class GithubProjectFinder {
 	 * @return valid HTTP URL for searching Github projects
 	 */
 	protected String buildUrl(String keyword, int limit, String orderByField) {
-		String searchUrl = baseUrl + keyword;
+		String searchUrl = baseUrl + URLEncoder.encode(keyword);
 		if (orderByField != null && !orderByField.isEmpty()) {
 			log.info("Will sort github projects by field " + orderByField);
 			searchUrl += "&sort=" + orderByField;
@@ -88,7 +89,7 @@ public class GithubProjectFinder {
 		if (keyword == null) {
 			throw new IllegalArgumentException("Keyword must not be null");
 		}
-		if (keyword.isEmpty()) {
+		if (keyword.trim().isEmpty()) {
 			throw new IllegalArgumentException("Keyword must not be empty string");
 		}
 		final int limitOutput = normalizeLimit(limit);
