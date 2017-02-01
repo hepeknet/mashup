@@ -1,4 +1,4 @@
-package mashup;
+package com.test.mashup.json;
 
 public class SimplePojo {
 

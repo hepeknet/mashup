@@ -26,4 +26,10 @@ public interface Constants {
 
 	String GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME = "github_search_cache_timeout_seconds";
 
+	String TWITTER_SEARCH_THREAD_POOL_SIZE_PROPERTY_NAME = "twitter_search_thread_pool_size";
+
+	String TWITTER_SEARCH_RETRY_MAX_ATTEMPTS_PROPERTY_NAME = "twitter_search_retry_max_attempts";
+
+	String TWITTER_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME = "twitter_search_retry_fixed_backoff_millis";
+
 }

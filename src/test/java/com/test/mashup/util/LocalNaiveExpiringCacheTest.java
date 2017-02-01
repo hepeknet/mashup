@@ -1,4 +1,4 @@
-package mashup.util;
+package com.test.mashup.util;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;

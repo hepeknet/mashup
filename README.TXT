@@ -34,6 +34,7 @@ POTENTIAL IMPROVEMENTS
 - Introduce 3PPs and reduce code doing plumbing things like: JSON parsing and conversion, caching
 - Introduce proper monitoring and exposing metrics. Some 3PP would be best for this.
 - Introduce proper system testing using Docker and some scripting language (like Groovy)
+- Use SLF4J for logging for improved performance and richer features
 
 INTERNAL - TODO: 
 

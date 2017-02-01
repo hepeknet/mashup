@@ -99,7 +99,6 @@ public class TweetFinder {
 		if (keyword == null) {
 			throw new IllegalArgumentException("Keyword must not be null");
 		}
-		System.out.println("Thread: " + Thread.currentThread().getId());
 		try {
 			final long start = System.currentTimeMillis();
 			final boolean shouldRetryGettingBearerInCaseOfFailure = true;
