@@ -85,6 +85,11 @@ public class GithubProjectFinder {
 		return limitOutput;
 	}
 
+	Map<String, Object> getParsedResults(String searchUrl) throws MalformedURLException, IOException {
+		log.info("Trying to parse data from " + searchUrl);
+		return parser.parse(new URL(searchUrl).openStream());
+	}
+
 	public List<GithubProject> findProjects(String keyword, int limit, String orderByField) {
 		if (keyword == null) {
 			throw new IllegalArgumentException("Keyword must not be null");
@@ -92,6 +97,8 @@ public class GithubProjectFinder {
 		if (keyword.trim().isEmpty()) {
 			throw new IllegalArgumentException("Keyword must not be empty string");
 		}
+		log.info("Searching for github projects. Keyword=" + keyword + ", limit=" + limit + ", orderByField="
+				+ orderByField);
 		final int limitOutput = normalizeLimit(limit);
 		final String searchUrl = buildUrl(keyword, limitOutput, orderByField);
 		// make sure limit is within acceptable range
@@ -99,12 +106,12 @@ public class GithubProjectFinder {
 		try {
 			final long startTime = System.currentTimeMillis();
 			/*
-			 * Ideally we would not have to do this if we had 3PP doing Json
-			 * parsing for us. But because of limited time to develop this
-			 * project and because of limitation that we can not use any 3PP we
-			 * had to create JSON parser that returns Map.
+			 * Ideally we would not have to do all this parsing/mapping below if
+			 * we had 3PP doing Json parsing for us. But because of limited time
+			 * to develop this project and because of limitation that we can not
+			 * use any 3PP we had to create JSON parser that returns Map.
 			 */
-			final Map<String, Object> searchResultsParsed = parser.parse(new URL(searchUrl).openStream());
+			final Map<String, Object> searchResultsParsed = getParsedResults(searchUrl);
 			if (log.isLoggable(Level.FINE)) {
 				log.fine("Parsed search results are " + searchResultsParsed);
 			}
@@ -139,7 +146,7 @@ public class GithubProjectFinder {
 			} else {
 				githubSearchFailures.inc();
 				throw new RuntimeException("Was not able to parse search results when accessing " + searchUrl
-						+ ". Check log for more details!");
+						+ ". Check log for more details! Did the API change?");
 			}
 		} catch (final MalformedURLException mue) {
 			throw new IllegalStateException("Malformed URL for github project search [" + searchUrl + "]", mue);
