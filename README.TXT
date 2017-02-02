@@ -1,3 +1,5 @@
+All questions or problems please send me an email at borisha.zivkovic@gmail.com
+
 ## INTRO
 
 One of restrictions given to me was to use JDK only but no other 3PP library for the main code.
@@ -104,11 +106,13 @@ If, for example, this application exposed some RESTful APIs to others then we wo
 - Introduce proper monitoring and expose internal metrics. Some 3PPs would be useful to do this or maybe internal libraries in your company.
 - Introduce proper system testing using Docker and some scripting language (like Groovy)
 - Introduce some kind of failure injection for more robust system tests (like ChaosMonkey)
-- Do local performance (and stress) testing and watch how JVM behaves (GC, hotspots etc). Try to optimize most obvious problems.
+- Do local performance (and stress) testing and watch how JVM behaves (GC, hotspots etc). Try to optimize most obvious problems. We can use jvisualvm for this.
 - Use SLF4J for logging for improved performance and richer feature set than what JUL is giving us. Again JUL is used because of limitations of this task
+
 - Probably move configuration to Zookeeper or Consul maybe - currently using property files is not flexible enough, especially for distributed systems.
    If we decided to move configuration to centralized location then application should fetch its configuration when needed and not only at startup like
    it is doing today.
+
 - If we decided to use Java only we could implement a lot of crosscutting concerns (like logging or exposing metrics) as annotation-based API so that
   it is easier to focus on business logic only. Either use 3PP for this or some internal libraries already available
 
@@ -117,4 +121,3 @@ If, for example, this application exposed some RESTful APIs to others then we wo
 - Documentation, especially if we are exposing APIs remotely or exposing some client library. 
     This is currently not the case for this project but it could expand.
 	If we are providing user library then API should be clearly separated (separate jar) from implementation jars.
-
