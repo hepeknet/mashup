@@ -9,6 +9,9 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import com.test.mashup.DependenciesFactory;
+import com.test.mashup.metrics.Histogram;
+
 /**
  * Very naive implementation of local expiring cache. Ideally we would use some
  * 3PP instead of this implementation (like Guava, EHCache, Hazelcast,
@@ -43,6 +46,18 @@ public class LocalExpiringCache<T> implements ExpiringCache<T> {
 	 */
 	private final DelayQueue<ExpiringElement> validKeys = new DelayQueue<>();
 
+	private final String cacheName;
+
+	private final Histogram cacheReadLatencyStats;
+
+	public LocalExpiringCache(String name) {
+		if (name == null || name.isEmpty()) {
+			throw new IllegalArgumentException("Cache name must not be null or empty!");
+		}
+		this.cacheName = name;
+		this.cacheReadLatencyStats = DependenciesFactory.createMetrics().getHistogram(cacheName + "_cacheReadLatencyStats");
+	}
+
 	@Override
 	public void put(String key, T value, long expiration, TimeUnit unit) {
 		if (key == null || key.isEmpty()) {
@@ -75,7 +90,7 @@ public class LocalExpiringCache<T> implements ExpiringCache<T> {
 			log.info("Local cache exceeded max cache size of " + maxCacheSize + " will purge it...");
 			cache.clear();
 			validKeys.clear();
-			log.info("Cleared local cache");
+			log.info("Successfully cleared local cache");
 		}
 	}
 
@@ -84,9 +99,13 @@ public class LocalExpiringCache<T> implements ExpiringCache<T> {
 		if (key == null || key.isEmpty()) {
 			throw new IllegalArgumentException("Key must not be null or empty string");
 		}
+		final long start = System.currentTimeMillis();
 		// first remove expired keys/values
 		removeExpiredKeys();
-		return cache.get(key);
+		final T val = cache.get(key);
+		final long totalTimeMs = System.currentTimeMillis() - start;
+		cacheReadLatencyStats.update(totalTimeMs);
+		return val;
 	}
 
 	/*

@@ -23,7 +23,7 @@ public class GithubProjectFinderWithCachingImpl extends GithubProjectFinderImpl 
 
 	private final int itemExpirationSeconds = ConfigurationUtil.getInt(Constants.GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME);
 
-	private final ExpiringCache<List<GithubProject>> cache = DependenciesFactory.createCache();
+	private final ExpiringCache<List<GithubProject>> cache = DependenciesFactory.createCache("GithubProjects");
 
 	private final Counter cacheHitCounter = DependenciesFactory.createMetrics().getCounter("GithubProjectSearchCacheHitsCount");
 	private final Counter cacheMissCounter = DependenciesFactory.createMetrics().getCounter("GithubProjectSearchCacheMissesCount");

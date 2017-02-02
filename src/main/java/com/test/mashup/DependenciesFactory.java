@@ -51,8 +51,15 @@ public abstract class DependenciesFactory {
 		return new TweetFinderImpl();
 	}
 
-	public static <T> ExpiringCache<T> createCache() {
-		return new LocalExpiringCache<T>();
+	/**
+	 * Creates appropriate cache implementation.
+	 * 
+	 * @param cacheName
+	 *            the name of cache
+	 * @return
+	 */
+	public static <T> ExpiringCache<T> createCache(String cacheName) {
+		return new LocalExpiringCache<T>(cacheName);
 	}
 
 	public static Metrics createMetrics() {

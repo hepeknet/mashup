@@ -36,8 +36,14 @@ public class GithubProjectFinderImpl implements GithubProjectFinder {
 	 */
 	private final JsonParser parser = DependenciesFactory.createParser();
 
+	/*
+	 * We expose statistics about latency when searching Github
+	 */
 	private final Histogram searchStatistics = DependenciesFactory.createMetrics().getHistogram("GithubProjectSearchTimeStats");
 
+	/*
+	 * We expose statistics about number of failures when searching Github
+	 */
 	private final Counter githubSearchFailures = DependenciesFactory.createMetrics().getCounter("GithubProjectSearchFailuresCount");
 
 	/*

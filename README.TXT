@@ -65,8 +65,11 @@ Few more hours of work should be done to add extra tests and maybe refactor a th
 We would also have to add integration tests and system tests. Those tests would test network failures, problems with DNS, problems with
 slow responses from remote dependencies etc. This can be done by mocking dependencies using some kind of embedded Jetty etc.
 
-We would have to add stress tests and reliability tests - but this would make sense mostly if this was not console only app, like it is today.
-If this application exposed some RESTful APIs to others then we would have to test its robustness further more, test deployment etc.
+We would have to add stress tests, concurrency, stability and reliability tests - but this would make sense mostly if this was not 
+console only app, like it is today.
+
+If, for example, this application exposed some RESTful APIs to others then we would have to treat it differently than how we treat it
+today when it is only single user terminal-only application.
 
 POTENTIAL IMPROVEMENTS
 

@@ -7,12 +7,9 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import com.test.mashup.util.ExpiringCache;
-import com.test.mashup.util.LocalExpiringCache;
-
 public class LocalExpiringCacheTest {
 
-	private final ExpiringCache<String> cache = new LocalExpiringCache<String>();
+	private final ExpiringCache<String> cache = new LocalExpiringCache<String>("Test");
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNullKey() {

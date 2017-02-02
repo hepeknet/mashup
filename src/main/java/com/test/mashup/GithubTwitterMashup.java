@@ -112,8 +112,8 @@ public class GithubTwitterMashup {
 	 */
 
 	/*
-	 * Executes all searches in parallel fashion, using thread pool as per
-	 * configuration provided.
+	 * Executes all twitter searches in a parallel fashion, using thread pool as
+	 * per configuration provided.
 	 */
 	private OutputResult doExecuteParallel(List<GithubProject> projects, RetryPolicy<List<Tweet>> rPolicy) {
 		final List<GithubProjectWithTweets> allProjects = projects.stream().map(p -> CompletableFuture.supplyAsync(() -> {
@@ -136,7 +136,7 @@ public class GithubTwitterMashup {
 	}
 
 	/*
-	 * Executes all searches in a single thread, one by one.
+	 * Executes all twitter searches in a single thread, one by one.
 	 */
 	private OutputResult doExecuteSingleThreaded(List<GithubProject> projects, RetryPolicy<List<Tweet>> rPolicy) {
 		final List<GithubProjectWithTweets> projectsWithTweets = new LinkedList<>();
