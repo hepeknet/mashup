@@ -3,4 +3,4 @@
 # In case you do not have appropriate Java version in the system path please put absolute path below
 # Before running this script     mvn clean package        must have been executed
 
-/home/borisa/programs/jdk1.8.0_121/bin/java -jar ./target/mashup-0.0.1-SNAPSHOT.jar
+java -jar ./target/mashup-0.0.1-SNAPSHOT.jar
