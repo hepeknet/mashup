@@ -32,7 +32,7 @@ public class Main {
 			.getHistogram("MashupStatisticsExecutionTimeMs");
 
 	public static void main(String[] args) throws Exception {
-		final MashupApp mashupApp = new MashupApp();
+		final GithubTwitterMashup mashupApp = new GithubTwitterMashup();
 		do {
 			printUsage();
 			final String line = System.console().readLine();
@@ -60,7 +60,7 @@ public class Main {
 	 * functionality. This method is responsible to invoke main functionality
 	 * and then print result in appropriate form.
 	 */
-	private static void searchAndPrintResult(MashupApp app, String keyword) {
+	private static void searchAndPrintResult(GithubTwitterMashup app, String keyword) {
 		final long start = System.currentTimeMillis();
 		final OutputResult result = app.executeSearch(keyword);
 		final String json = parser.toJson(result);

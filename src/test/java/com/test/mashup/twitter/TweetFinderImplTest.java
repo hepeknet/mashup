@@ -29,7 +29,7 @@ public class TweetFinderImplTest {
 	}
 
 	@Test
-	public void testBearerCanNotBeFound() throws Exception {
+	public void testBearerCanNotBeFoundNoRecoveryAttempted() throws Exception {
 		final TweetFinderImpl finder = spy(TweetFinderImpl.class);
 		doThrow(IOException.class).when(finder).getBearer(any(String.class));
 		try {
@@ -37,6 +37,7 @@ public class TweetFinderImplTest {
 		} catch (final IllegalStateException ise) {
 			assertTrue(true);
 		}
+		// verify no recovery attempted because failed bearer search
 		verify(finder, never()).tryToGetTweets(any(String.class), eq(false));
 		verify(finder, times(1)).tryToGetTweets(any(String.class), eq(true));
 	}
@@ -50,6 +51,7 @@ public class TweetFinderImplTest {
 		} catch (final RuntimeException re) {
 			assertTrue(true);
 		}
+		// verify we did recovery because AUTH failed
 		verify(finder, times(1)).tryToGetTweets(any(String.class), eq(false));
 		verify(finder, times(1)).tryToGetTweets(any(String.class), eq(true));
 	}

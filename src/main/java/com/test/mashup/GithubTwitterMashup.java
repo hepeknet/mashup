@@ -24,12 +24,12 @@ import com.test.mashup.util.NamedThreadFactory;
  * deals with recovery and retries, decides whether to use parallel search or
  * not.
  * 
- * Main method (or potentially REST endpoint) use this to do all the work.
+ * Main method (or potentially REST endpoint) use this class to do all the work.
  * 
  * @author borisa
  *
  */
-public class MashupApp {
+public class GithubTwitterMashup {
 
 	private final Logger log = Logger.getLogger(getClass().getName());
 
@@ -62,7 +62,7 @@ public class MashupApp {
 	 */
 	private final ExecutorService twitterExecService;
 
-	public MashupApp() {
+	public GithubTwitterMashup() {
 		if (twitterSearchThreadPoolSize > 0) {
 			twitterExecService = Executors.newFixedThreadPool(twitterSearchThreadPoolSize,
 					new NamedThreadFactory("twitter-search"));
@@ -119,7 +119,8 @@ public class MashupApp {
 				.map(p -> CompletableFuture.supplyAsync(() -> {
 					if (log.isLoggable(Level.INFO)) {
 						// for better visibility and just because JUL does not
-						// allow us to use thread name in log output
+						// allow us to use thread name in log output when using
+						// standard formatter
 						log.info("Executing parallel twitter search - thread " + Thread.currentThread().getName());
 					}
 					// execute twitter search with retry policy

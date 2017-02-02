@@ -1,5 +1,6 @@
 package com.test.mashup.retry;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -72,6 +73,14 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 		}
 		throw new RetryFailedException(
 				"Failed to execute retry policy " + name + " after " + maxAttempts + " attempts!", lastThrownException);
+	}
+
+	@Override
+	public V execute(Callable<V> e, List<Exception> retryOnlyFor) {
+		// TODO: not implemented for now, not needed for our use case but useful
+		// for future needs
+		log.warning("This feature is not fully implemented for now! Will fallback to simpler implementation!");
+		return execute(e);
 	}
 
 }

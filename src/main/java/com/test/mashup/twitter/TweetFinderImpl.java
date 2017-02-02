@@ -247,7 +247,9 @@ public class TweetFinderImpl implements TwitterFinder {
 	}
 
 	/*
-	 * Have to make sure we can not fail in this method whatever happens
+	 * Have to make sure we can not fail in this method whatever happens. For
+	 * example connection might not be in good state, but we still want to
+	 * report as much information to user as we can.
 	 */
 	private void handleHttpConnectionError(HttpURLConnection conn, String phase) throws IOException {
 		String errMessage = null;
