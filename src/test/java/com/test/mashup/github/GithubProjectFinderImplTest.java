@@ -14,22 +14,22 @@ import java.util.Map;
 
 import org.junit.Test;
 
-public class GithubProjectFinderTest {
+public class GithubProjectFinderImplTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNull() {
-		new GithubProjectFinder().findProjects(null);
+		new GithubProjectFinderImpl().findProjects(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testEmpty() {
-		new GithubProjectFinder().findProjects(" ");
+		new GithubProjectFinderImpl().findProjects(" ");
 	}
 
 	@Test(expected = RuntimeException.class)
 	public void testInvalidJsonFormat() {
 		final String keyword = "key1";
-		final GithubProjectFinder finder = spy(GithubProjectFinder.class);
+		final GithubProjectFinderImpl finder = spy(GithubProjectFinderImpl.class);
 		when(finder.buildUrl(keyword, 10, "star")).thenReturn("http://google.com");
 		finder.findProjects(keyword, 10, "star");
 	}
@@ -37,7 +37,7 @@ public class GithubProjectFinderTest {
 	@Test(expected = IllegalStateException.class)
 	public void testNonExistentURL() {
 		final String keyword = "key2";
-		final GithubProjectFinder finder = spy(GithubProjectFinder.class);
+		final GithubProjectFinderImpl finder = spy(GithubProjectFinderImpl.class);
 		when(finder.buildUrl(keyword, 10, "star")).thenReturn("http://does-not-exist-website.www/aaa");
 		finder.findProjects(keyword, 10, "star");
 	}
@@ -45,7 +45,7 @@ public class GithubProjectFinderTest {
 	@Test(expected = RuntimeException.class)
 	public void testParsedResultsNull() throws IOException {
 		final String keyword = "key3";
-		final GithubProjectFinder finder = spy(GithubProjectFinder.class);
+		final GithubProjectFinderImpl finder = spy(GithubProjectFinderImpl.class);
 		doReturn(null).when(finder).getParsedResults(any(String.class));
 		finder.findProjects(keyword, 10, "star");
 	}
@@ -53,7 +53,7 @@ public class GithubProjectFinderTest {
 	@Test(expected = RuntimeException.class)
 	public void testParsedResultsEmpty() throws IOException {
 		final String keyword = "key4";
-		final GithubProjectFinder finder = spy(GithubProjectFinder.class);
+		final GithubProjectFinderImpl finder = spy(GithubProjectFinderImpl.class);
 		doReturn(new HashMap<>()).when(finder).getParsedResults(any(String.class));
 		finder.findProjects(keyword, 10, "star");
 	}
@@ -63,7 +63,7 @@ public class GithubProjectFinderTest {
 		final Map<String, Object> result = new HashMap<>();
 		result.put("k", "v");
 		final String keyword = "key5";
-		final GithubProjectFinder finder = spy(GithubProjectFinder.class);
+		final GithubProjectFinderImpl finder = spy(GithubProjectFinderImpl.class);
 		doReturn(result).when(finder).getParsedResults(any(String.class));
 		finder.findProjects(keyword, 10, "star");
 	}
@@ -78,7 +78,7 @@ public class GithubProjectFinderTest {
 		final Map<String, Object> results = new HashMap<>();
 		results.put("items", projects);
 		final String keyword = "key6";
-		final GithubProjectFinder finder = spy(GithubProjectFinder.class);
+		final GithubProjectFinderImpl finder = spy(GithubProjectFinderImpl.class);
 		doReturn(results).when(finder).getParsedResults(any(String.class));
 		final List<GithubProject> found = finder.findProjects(keyword, 10, "star");
 		assertEquals(1, found.size());
@@ -99,7 +99,7 @@ public class GithubProjectFinderTest {
 		final Map<String, Object> results = new HashMap<>();
 		results.put("items", projects);
 		final String keyword = "key6";
-		final GithubProjectFinder finder = spy(GithubProjectFinder.class);
+		final GithubProjectFinderImpl finder = spy(GithubProjectFinderImpl.class);
 		doReturn(results).when(finder).getParsedResults(any(String.class));
 		final List<GithubProject> found = finder.findProjects(keyword, limit, "star");
 		assertEquals(limit, found.size());

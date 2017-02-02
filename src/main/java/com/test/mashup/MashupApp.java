@@ -14,7 +14,7 @@ import com.test.mashup.github.GithubProjectFinder;
 import com.test.mashup.retry.RetryPolicy;
 import com.test.mashup.retry.SimpleRetryPolicy;
 import com.test.mashup.twitter.Tweet;
-import com.test.mashup.twitter.TweetFinder;
+import com.test.mashup.twitter.TwitterFinder;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 import com.test.mashup.util.NamedThreadFactory;
@@ -54,7 +54,7 @@ public class MashupApp {
 	 * it easier to test and swap different implementations.
 	 */
 	private final GithubProjectFinder githubFinder = DependenciesFactory.createGithubProjectFinder();
-	private final TweetFinder tweetFinder = DependenciesFactory.createTweetFinder();
+	private final TwitterFinder tweetFinder = DependenciesFactory.createTweetFinder();
 
 	/*
 	 * Executor service used for parallel twitter searches - in case when

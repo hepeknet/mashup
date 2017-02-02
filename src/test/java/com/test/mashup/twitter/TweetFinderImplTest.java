@@ -14,23 +14,23 @@ import java.io.IOException;
 
 import org.junit.Test;
 
-public class TweetFinderTest {
+public class TweetFinderImplTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testNull() {
-		final TweetFinder finder = new TweetFinder();
+		final TwitterFinder finder = new TweetFinderImpl();
 		finder.searchTwitter(null);
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void testEmpty() {
-		final TweetFinder finder = new TweetFinder();
+		final TwitterFinder finder = new TweetFinderImpl();
 		finder.searchTwitter(" ");
 	}
 
 	@Test
 	public void testBearerCanNotBeFound() throws Exception {
-		final TweetFinder finder = spy(TweetFinder.class);
+		final TweetFinderImpl finder = spy(TweetFinderImpl.class);
 		doThrow(IOException.class).when(finder).getBearer(any(String.class));
 		try {
 			finder.searchTwitter("abc");
@@ -43,7 +43,7 @@ public class TweetFinderTest {
 
 	@Test
 	public void testInvalidBearerWithRecovery() throws Exception {
-		final TweetFinder finder = spy(TweetFinder.class);
+		final TweetFinderImpl finder = spy(TweetFinderImpl.class);
 		doReturn("Invalid-bearer").when(finder).getBearer(any(String.class));
 		try {
 			finder.searchTwitter("abc");
@@ -56,13 +56,13 @@ public class TweetFinderTest {
 
 	@Test(expected = RuntimeException.class)
 	public void testBearerWrongURL() throws IOException {
-		final TweetFinder finder = spy(TweetFinder.class);
+		final TweetFinderImpl finder = spy(TweetFinderImpl.class);
 		finder.getBearer("http://google.com");
 	}
 
 	@Test(expected = RuntimeException.class)
 	public void testBearerNonExistentURL() throws IOException {
-		final TweetFinder finder = spy(TweetFinder.class);
+		final TweetFinderImpl finder = spy(TweetFinderImpl.class);
 		finder.getBearer("http://does-not-exist-url.wwwa/a/b");
 	}
 

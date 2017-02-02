@@ -1,12 +1,14 @@
 package com.test.mashup;
 
 import com.test.mashup.github.GithubProjectFinder;
-import com.test.mashup.github.GithubProjectFinderWithCaching;
+import com.test.mashup.github.GithubProjectFinderImpl;
+import com.test.mashup.github.GithubProjectFinderWithCachingImpl;
 import com.test.mashup.json.JsonParser;
 import com.test.mashup.json.SimpleNativeJsonParser;
 import com.test.mashup.metrics.Metrics;
 import com.test.mashup.metrics.LoggingOnlyMetricsImplementation;
-import com.test.mashup.twitter.TweetFinder;
+import com.test.mashup.twitter.TweetFinderImpl;
+import com.test.mashup.twitter.TwitterFinder;
 import com.test.mashup.util.ConfigurationUtil;
 import com.test.mashup.util.Constants;
 import com.test.mashup.util.ExpiringCache;
@@ -40,14 +42,14 @@ public abstract class DependenciesFactory {
 				.getInt(Constants.GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME);
 		final boolean isCachingTurnedOn = githubProjectCacheTimeoutSeconds > 0;
 		if (isCachingTurnedOn) {
-			return new GithubProjectFinderWithCaching();
+			return new GithubProjectFinderWithCachingImpl();
 		} else {
-			return new GithubProjectFinder();
+			return new GithubProjectFinderImpl();
 		}
 	}
 
-	public static TweetFinder createTweetFinder() {
-		return new TweetFinder();
+	public static TwitterFinder createTweetFinder() {
+		return new TweetFinderImpl();
 	}
 
 	public static <T> ExpiringCache<T> createCache() {

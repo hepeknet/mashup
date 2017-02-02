@@ -42,7 +42,7 @@ import com.test.mashup.util.StringUtil;
  * @author borisa
  *
  */
-public class TweetFinder {
+public class TweetFinderImpl implements TwitterFinder {
 
 	private final Logger log = Logger.getLogger(getClass().getName());
 
@@ -85,6 +85,7 @@ public class TweetFinder {
 	 * @return a list of tweets containing given keyword. List will have a
 	 *         limited size based on configuration.
 	 */
+	@Override
 	public List<Tweet> searchTwitter(String keyword) {
 		if (keyword == null) {
 			throw new IllegalArgumentException("Keyword must not be null");

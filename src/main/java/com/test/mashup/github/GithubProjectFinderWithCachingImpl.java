@@ -10,7 +10,7 @@ import com.test.mashup.util.Constants;
 import com.test.mashup.util.ExpiringCache;
 
 /**
- * Caching decorator around {@link GithubProjectFinder}. It will cache results
+ * Caching decorator around {@link GithubProjectFinderImpl}. It will cache results
  * of search and keep them in memory for configured number of seconds.
  * 
  * Again, we expect that higher level code will peform retry policy when
@@ -19,7 +19,7 @@ import com.test.mashup.util.ExpiringCache;
  * @author borisa
  *
  */
-public class GithubProjectFinderWithCaching extends GithubProjectFinder {
+public class GithubProjectFinderWithCachingImpl extends GithubProjectFinderImpl {
 
 	private final int itemExpirationSeconds = ConfigurationUtil
 			.getInt(Constants.GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME);
