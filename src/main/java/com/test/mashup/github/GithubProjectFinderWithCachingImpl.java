@@ -10,10 +10,10 @@ import com.test.mashup.util.Constants;
 import com.test.mashup.util.ExpiringCache;
 
 /**
- * Caching decorator around {@link GithubProjectFinderImpl}. It will cache results
- * of search and keep them in memory for configured number of seconds.
+ * Caching decorator around {@link GithubProjectFinderImpl}. It will cache
+ * results of search and keep them in memory for configured number of seconds.
  * 
- * Again, we expect that higher level code will peform retry policy when
+ * Again, we expect that higher level code will perform retry policy when
  * invoking methods of this class.
  * 
  * @author borisa
@@ -21,15 +21,12 @@ import com.test.mashup.util.ExpiringCache;
  */
 public class GithubProjectFinderWithCachingImpl extends GithubProjectFinderImpl {
 
-	private final int itemExpirationSeconds = ConfigurationUtil
-			.getInt(Constants.GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME);
+	private final int itemExpirationSeconds = ConfigurationUtil.getInt(Constants.GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME);
 
 	private final ExpiringCache<List<GithubProject>> cache = DependenciesFactory.createCache();
 
-	private final Counter cacheHitCounter = DependenciesFactory.createMetrics()
-			.getCounter("GithubProjectsCacheHitsCount");
-	private final Counter cacheMissCounter = DependenciesFactory.createMetrics()
-			.getCounter("GithubProjectsCacheMissesCount");
+	private final Counter cacheHitCounter = DependenciesFactory.createMetrics().getCounter("GithubProjectSearchCacheHitsCount");
+	private final Counter cacheMissCounter = DependenciesFactory.createMetrics().getCounter("GithubProjectSearchCacheMissesCount");
 
 	@Override
 	public List<GithubProject> findProjects(String keyword, int limit, String orderByField) {
@@ -50,8 +47,7 @@ public class GithubProjectFinderWithCachingImpl extends GithubProjectFinderImpl 
 			cacheMissCounter.inc();
 			final List<GithubProject> result = super.findProjects(keyword, limitOutput, orderByField);
 			cache.put(searchUrl, result, itemExpirationSeconds, TimeUnit.SECONDS);
-			log.fine("Cached found projects for search url " + searchUrl + " and will keep them there for "
-					+ itemExpirationSeconds + " seconds");
+			log.fine("Cached found projects for search url " + searchUrl + " and will keep them there for " + itemExpirationSeconds + " seconds");
 			return result;
 		}
 	}

@@ -49,15 +49,12 @@ public class TweetFinderImpl implements TwitterFinder {
 	/*
 	 * Configuration parameters
 	 */
-	private final String baseSearchUrl = ConfigurationUtil
-			.getStringRequired(Constants.TWITTER_SEARCH_BASE_URL_PROPERTY_NAME);
+	private final String baseSearchUrl = ConfigurationUtil.getStringRequired(Constants.TWITTER_SEARCH_BASE_URL_PROPERTY_NAME);
 	private final String bearerUrl = ConfigurationUtil.getStringRequired(Constants.TWITTER_BEARER_URL_PROPERTY_NAME);
-	private final String bearerRequiredTokenType = ConfigurationUtil
-			.getStringRequired(Constants.TWITTER_BEARER_REQUIRED_TOKEN_TYPE_PROPERTY_NAME);
+	private final String bearerRequiredTokenType = ConfigurationUtil.getStringRequired(Constants.TWITTER_BEARER_REQUIRED_TOKEN_TYPE_PROPERTY_NAME);
 	private final int maxTweetsPerSearch = ConfigurationUtil.getInt(Constants.TWITTER_SEARCH_MAX_TWEETS_PROPERTY_NAME);
 
-	private final int httpConnectionTimeoutMillis = ConfigurationUtil
-			.getInt(Constants.HTTP_CONNECTION_TIMEOUT_MILLIS_PROPERTY_NAME);
+	private final int httpConnectionTimeoutMillis = ConfigurationUtil.getInt(Constants.HTTP_CONNECTION_TIMEOUT_MILLIS_PROPERTY_NAME);
 
 	private final String key = ConfigurationUtil.getStringRequired(Constants.TWITTER_AUTH_KEY_PROPERTY_NAME);
 	private final String secret = ConfigurationUtil.getStringRequired(Constants.TWITTER_AUTH_SECRET_PROPERTY_NAME);
@@ -70,8 +67,7 @@ public class TweetFinderImpl implements TwitterFinder {
 	/*
 	 * Used for exposing metrics to external world
 	 */
-	private final Histogram tweetSearchStats = DependenciesFactory.createMetrics()
-			.getHistogram("TwitterSearchExecutionTimeStats");
+	private final Histogram tweetSearchStats = DependenciesFactory.createMetrics().getHistogram("TwitterSearchExecutionTimeStats");
 	private final Counter tweetSearchFailures = DependenciesFactory.createMetrics().getCounter("TwitterSearchFailures");
 
 	/**
@@ -133,8 +129,7 @@ public class TweetFinderImpl implements TwitterFinder {
 					return tweets;
 				} else {
 					tweetSearchFailures.inc();
-					throw new IllegalStateException(
-							"Did not find [statuses] in twitter response. Possibly API change?");
+					throw new IllegalStateException("Did not find [statuses] in twitter response. Possibly API change?");
 				}
 			} else {
 				tweetSearchFailures.inc();
@@ -186,8 +181,7 @@ public class TweetFinderImpl implements TwitterFinder {
 				}
 			}
 		} catch (final IOException exc) {
-			handleHttpConnectionError(httpCon,
-					"twitter search for [" + keyword + "] - url for search is [" + searchUrl + "]");
+			handleHttpConnectionError(httpCon, "twitter search for [" + keyword + "] - url for search is [" + searchUrl + "]");
 		}
 		return httpCon.getInputStream();
 	}
@@ -231,13 +225,11 @@ public class TweetFinderImpl implements TwitterFinder {
 						cachedBearer = (String) parsedBody.get("access_token");
 						log.info("Found bearer and cached its value for further use...");
 					} else {
-						throw new IllegalStateException("Got wrong token type for bearer [" + tokenType
-								+ "]. Expected it to be " + bearerRequiredTokenType
+						throw new IllegalStateException("Got wrong token type for bearer [" + tokenType + "]. Expected it to be " + bearerRequiredTokenType
 								+ ". Either configuration is bad or Twitter API changed!");
 					}
 				} else {
-					throw new IllegalStateException(
-							"Did not find appropriate data in response - unable to get bearer token!");
+					throw new IllegalStateException("Did not find appropriate data in response - unable to get bearer token!");
 				}
 			} catch (final IOException exc) {
 				handleHttpConnectionError(httpCon, "bearer fetch from url [" + urlStr + "]");
@@ -255,15 +247,13 @@ public class TweetFinderImpl implements TwitterFinder {
 		String errMessage = null;
 		try {
 			final String message = conn.getResponseMessage();
-			log.info("Processing error message for " + conn + " and phase " + phase + ", response message is "
-					+ message);
+			log.info("Processing error message for " + conn + " and phase " + phase + ", response message is " + message);
 			String errorDescription = "";
 			if (conn.getErrorStream() != null) {
 				errorDescription = StringUtil.inputStreamToString(conn.getErrorStream());
 			}
 			final int code = conn.getResponseCode();
-			errMessage = "Caught exception performing " + phase + ". Error: " + message + ", error code:" + code
-					+ ", description: " + errorDescription;
+			errMessage = "Caught exception performing " + phase + ". Error: " + message + ", error code:" + code + ", description: " + errorDescription;
 		} catch (final Exception exc) {
 			/*
 			 * this can happen if there is no network connectivity or URL set in

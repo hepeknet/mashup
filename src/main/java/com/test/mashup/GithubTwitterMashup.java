@@ -36,18 +36,13 @@ public class GithubTwitterMashup {
 	/*
 	 * Configuration properties
 	 */
-	private final int twitterSearchThreadPoolSize = ConfigurationUtil
-			.getInt(Constants.TWITTER_SEARCH_THREAD_POOL_SIZE_PROPERTY_NAME);
+	private final int twitterSearchThreadPoolSize = ConfigurationUtil.getInt(Constants.TWITTER_SEARCH_THREAD_POOL_SIZE_PROPERTY_NAME);
 
-	private final int twitterSearchRetryMaxAttempts = ConfigurationUtil
-			.getInt(Constants.TWITTER_SEARCH_RETRY_MAX_ATTEMPTS_PROPERTY_NAME);
-	private final int twitterSearchRetryBackoffMillis = ConfigurationUtil
-			.getInt(Constants.TWITTER_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME);
+	private final int twitterSearchRetryMaxAttempts = ConfigurationUtil.getInt(Constants.TWITTER_SEARCH_RETRY_MAX_ATTEMPTS_PROPERTY_NAME);
+	private final int twitterSearchRetryBackoffMillis = ConfigurationUtil.getInt(Constants.TWITTER_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME);
 
-	private final int githubSearchRetryMaxAttempts = ConfigurationUtil
-			.getInt(Constants.GITHUB_SEARCH_RETRY_MAX_ATTEMPTS_PROPERTY_NAME);
-	private final int githubSearchRetryBackoffMillis = ConfigurationUtil
-			.getInt(Constants.GITHUB_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME);
+	private final int githubSearchRetryMaxAttempts = ConfigurationUtil.getInt(Constants.GITHUB_SEARCH_RETRY_MAX_ATTEMPTS_PROPERTY_NAME);
+	private final int githubSearchRetryBackoffMillis = ConfigurationUtil.getInt(Constants.GITHUB_SEARCH_RETRY_FIXED_BACKOFF_MILLIS_PROPERTY_NAME);
 
 	/*
 	 * Dependencies needed. Ideally some kind of DI would inject these to make
@@ -64,8 +59,7 @@ public class GithubTwitterMashup {
 
 	public GithubTwitterMashup() {
 		if (twitterSearchThreadPoolSize > 0) {
-			twitterExecService = Executors.newFixedThreadPool(twitterSearchThreadPoolSize,
-					new NamedThreadFactory("twitter-search"));
+			twitterExecService = Executors.newFixedThreadPool(twitterSearchThreadPoolSize, new NamedThreadFactory("twitter-search"));
 		} else {
 			twitterExecService = null;
 		}
@@ -87,14 +81,14 @@ public class GithubTwitterMashup {
 		}
 		final String trimmed = keyword.trim();
 		log.info("Creating mashup by keyword [" + trimmed + "]");
-		final RetryPolicy<List<GithubProject>> githubSearchRetryPolicy = new SimpleRetryPolicy<>("github-search",
-				githubSearchRetryMaxAttempts, githubSearchRetryBackoffMillis);
+		final RetryPolicy<List<GithubProject>> githubSearchRetryPolicy = new SimpleRetryPolicy<>("github-search", githubSearchRetryMaxAttempts,
+				githubSearchRetryBackoffMillis);
 		final List<GithubProject> projects = githubSearchRetryPolicy.execute(() -> githubFinder.findProjects(trimmed));
 
 		OutputResult result = new OutputResult();
 
-		final RetryPolicy<List<Tweet>> twitterSearchRetryPolicy = new SimpleRetryPolicy<>("twitter-search",
-				twitterSearchRetryMaxAttempts, twitterSearchRetryBackoffMillis);
+		final RetryPolicy<List<Tweet>> twitterSearchRetryPolicy = new SimpleRetryPolicy<>("twitter-search", twitterSearchRetryMaxAttempts,
+				twitterSearchRetryBackoffMillis);
 		// now we choose whether to go parallel or not
 		// based on configuration provided
 		if (twitterExecService != null) {
@@ -111,25 +105,31 @@ public class GithubTwitterMashup {
 	}
 
 	/*
+	 * I was not asked for this but I wanted to provide two possible
+	 * implementations of search and mashup. First one is single-threaded.
+	 * Second one is parallel. Which one is used depends on configuration. By
+	 * default parallel one is used.
+	 */
+
+	/*
 	 * Executes all searches in parallel fashion, using thread pool as per
 	 * configuration provided.
 	 */
 	private OutputResult doExecuteParallel(List<GithubProject> projects, RetryPolicy<List<Tweet>> rPolicy) {
-		final List<GithubProjectWithTweets> allProjects = projects.stream()
-				.map(p -> CompletableFuture.supplyAsync(() -> {
-					if (log.isLoggable(Level.INFO)) {
-						// for better visibility and just because JUL does not
-						// allow us to use thread name in log output when using
-						// standard formatter
-						log.info("Executing parallel twitter search - thread " + Thread.currentThread().getName());
-					}
-					// execute twitter search with retry policy
-					final List<Tweet> tweets = rPolicy.execute(() -> tweetFinder.searchTwitter(p.getName()));
-					final GithubProjectWithTweets gt = new GithubProjectWithTweets();
-					gt.setProject(p);
-					gt.setTweets(tweets);
-					return gt;
-				}, twitterExecService)).map(CompletableFuture::join).collect(Collectors.toList());
+		final List<GithubProjectWithTweets> allProjects = projects.stream().map(p -> CompletableFuture.supplyAsync(() -> {
+			if (log.isLoggable(Level.INFO)) {
+				// for better visibility and just because JUL does not
+				// allow us to use thread name in log output when using
+				// standard formatter
+				log.info("Executing parallel twitter search - thread " + Thread.currentThread().getName());
+			}
+			// execute twitter search with retry policy
+			final List<Tweet> tweets = rPolicy.execute(() -> tweetFinder.searchTwitter(p.getName()));
+			final GithubProjectWithTweets gt = new GithubProjectWithTweets();
+			gt.setProject(p);
+			gt.setTweets(tweets);
+			return gt;
+		}, twitterExecService)).map(CompletableFuture::join).collect(Collectors.toList());
 		final OutputResult result = new OutputResult();
 		result.setProjects(allProjects);
 		return result;

@@ -37,8 +37,7 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 		this.name = name;
 		this.maxAttempts = maxAttempts;
 		this.fixedBackOffPeriodMillis = fixedBackOffPeriodMillis;
-		log.info("Retry policy for " + name + ", maxAttempts=" + maxAttempts + ", fixedBackoffPeriodMs="
-				+ fixedBackOffPeriodMillis);
+		log.info("Retry policy for " + name + ", maxAttempts=" + maxAttempts + ", fixedBackoffPeriodMs=" + fixedBackOffPeriodMillis);
 	}
 
 	@Override
@@ -46,8 +45,7 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 		if (e == null) {
 			throw new IllegalArgumentException("Execution must not be null");
 		}
-		log.fine("Executing call for " + name + ", maxAttempts=" + maxAttempts + ", backoff="
-				+ fixedBackOffPeriodMillis);
+		log.fine("Executing call for " + name + ", maxAttempts=" + maxAttempts + ", backoff=" + fixedBackOffPeriodMillis);
 		V v = null;
 		Exception lastThrownException = null;
 		// try to recover and either return result in case of success or last
@@ -62,8 +60,7 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 				lastThrownException = exc;
 				if (fixedBackOffPeriodMillis > 0) {
 					try {
-						log.fine("Waiting for " + fixedBackOffPeriodMillis + " ms - retry policy " + name
-								+ ", attemptNumber = " + i);
+						log.fine("Waiting for " + fixedBackOffPeriodMillis + " ms - retry policy " + name + ", attemptNumber = " + i);
 						TimeUnit.MILLISECONDS.sleep(fixedBackOffPeriodMillis);
 					} catch (final InterruptedException e1) {
 						// do nothing here
@@ -71,8 +68,7 @@ public class SimpleRetryPolicy<V> implements RetryPolicy<V> {
 				}
 			}
 		}
-		throw new RetryFailedException(
-				"Failed to execute retry policy " + name + " after " + maxAttempts + " attempts!", lastThrownException);
+		throw new RetryFailedException("Failed to execute retry policy " + name + " after " + maxAttempts + " attempts!", lastThrownException);
 	}
 
 	@Override

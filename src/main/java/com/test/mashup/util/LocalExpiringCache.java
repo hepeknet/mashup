@@ -14,7 +14,7 @@ import java.util.logging.Logger;
  * 3PP instead of this implementation (like Guava, EHCache, Hazelcast,
  * Infinispan...)
  * 
- * This implementation uses {@code DelayQueue} for expiration. There is no need
+ * This implementation uses {@link DelayQueue} for expiration. There is no need
  * for background threads to clear the cache periodically since clearing is done
  * on every get request - which is a good compromise between speed and accuracy.
  * 

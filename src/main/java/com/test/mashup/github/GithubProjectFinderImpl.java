@@ -36,20 +36,16 @@ public class GithubProjectFinderImpl implements GithubProjectFinder {
 	 */
 	private final JsonParser parser = DependenciesFactory.createParser();
 
-	private final Histogram searchStatistics = DependenciesFactory.createMetrics()
-			.getHistogram("GithubProjectSearchTimeStats");
+	private final Histogram searchStatistics = DependenciesFactory.createMetrics().getHistogram("GithubProjectSearchTimeStats");
 
-	private final Counter githubSearchFailures = DependenciesFactory.createMetrics()
-			.getCounter("GithubProjectSearchFailuresCount");
+	private final Counter githubSearchFailures = DependenciesFactory.createMetrics().getCounter("GithubProjectSearchFailuresCount");
 
 	/*
 	 * Configuration properties
 	 */
 	private final String baseUrl = ConfigurationUtil.getStringRequired(Constants.GITHUB_SEARCH_BASE_URL_PROPERTY_NAME);
-	private final int projectSearchLimit = ConfigurationUtil
-			.getInt(Constants.GITHUB_SEARCH_MAX_PROJECTS_LIMIT_PROPERTY_NAME);
-	private final String sortField = ConfigurationUtil
-			.getString(Constants.GITHUB_SEARCH_DEFAULT_SORT_FIELD_PROPERTY_NAME);
+	private final int projectSearchLimit = ConfigurationUtil.getInt(Constants.GITHUB_SEARCH_MAX_PROJECTS_LIMIT_PROPERTY_NAME);
+	private final String sortField = ConfigurationUtil.getString(Constants.GITHUB_SEARCH_DEFAULT_SORT_FIELD_PROPERTY_NAME);
 
 	@Override
 	public List<GithubProject> findProjects(String keyword) {
@@ -99,11 +95,10 @@ public class GithubProjectFinderImpl implements GithubProjectFinder {
 		if (keyword.trim().isEmpty()) {
 			throw new IllegalArgumentException("Keyword must not be empty string");
 		}
-		log.info("Searching for github projects. Keyword=" + keyword + ", limit=" + limit + ", orderByField="
-				+ orderByField);
+		log.info("Searching for github projects. Keyword=" + keyword + ", limit=" + limit + ", orderByField=" + orderByField);
+		// make sure limit is within acceptable range
 		final int limitOutput = normalizeLimit(limit);
 		final String searchUrl = buildUrl(keyword, limitOutput, orderByField);
-		// make sure limit is within acceptable range
 		final List<GithubProject> results = new ArrayList<GithubProject>(limitOutput);
 		try {
 			final long startTime = System.currentTimeMillis();
@@ -142,13 +137,12 @@ public class GithubProjectFinderImpl implements GithubProjectFinder {
 					log.info("Found " + results.size() + " github projects based on search [" + keyword + "]");
 				} else {
 					githubSearchFailures.inc();
-					throw new RuntimeException(
-							"Was not able to find field [items] in parsed search results. Did GitHub API change?");
+					throw new RuntimeException("Was not able to find field [items] in parsed search results. Did GitHub API change?");
 				}
 			} else {
 				githubSearchFailures.inc();
-				throw new RuntimeException("Was not able to parse search results when accessing " + searchUrl
-						+ ". Check log for more details! Did the API change?");
+				throw new RuntimeException(
+						"Was not able to parse search results when accessing " + searchUrl + ". Check log for more details! Did the API change?");
 			}
 		} catch (final MalformedURLException mue) {
 			throw new IllegalStateException("Malformed URL for github project search [" + searchUrl + "]", mue);

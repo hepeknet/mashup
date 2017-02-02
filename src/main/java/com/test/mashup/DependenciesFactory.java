@@ -5,8 +5,8 @@ import com.test.mashup.github.GithubProjectFinderImpl;
 import com.test.mashup.github.GithubProjectFinderWithCachingImpl;
 import com.test.mashup.json.JsonParser;
 import com.test.mashup.json.SimpleNativeJsonParser;
-import com.test.mashup.metrics.Metrics;
 import com.test.mashup.metrics.LoggingOnlyMetricsImplementation;
+import com.test.mashup.metrics.Metrics;
 import com.test.mashup.twitter.TweetFinderImpl;
 import com.test.mashup.twitter.TwitterFinder;
 import com.test.mashup.util.ConfigurationUtil;
@@ -38,8 +38,7 @@ public abstract class DependenciesFactory {
 	 * @return
 	 */
 	public static GithubProjectFinder createGithubProjectFinder() {
-		final int githubProjectCacheTimeoutSeconds = ConfigurationUtil
-				.getInt(Constants.GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME);
+		final int githubProjectCacheTimeoutSeconds = ConfigurationUtil.getInt(Constants.GITHUB_SEARCH_CACHE_TIMEOUT_SECONDS_PROPERTY_NAME);
 		final boolean isCachingTurnedOn = githubProjectCacheTimeoutSeconds > 0;
 		if (isCachingTurnedOn) {
 			return new GithubProjectFinderWithCachingImpl();

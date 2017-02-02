@@ -49,7 +49,7 @@ public class SimpleNativeJsonParser implements JsonParser {
 	/*
 	 * Cache engine - performance optimization
 	 */
-	private final ScriptEngine se = new ScriptEngineManager().getEngineByName(JAVASCRIPT_ENGINE_NAME);
+	private final ScriptEngine javascriptEngine = new ScriptEngineManager().getEngineByName(JAVASCRIPT_ENGINE_NAME);
 
 	@Override
 	public Map<String, Object> parse(String source) {
@@ -62,11 +62,12 @@ public class SimpleNativeJsonParser implements JsonParser {
 		if (log.isLoggable(Level.FINE)) {
 			log.fine("Will try to parse " + source + " as JSON");
 		}
-		// provided as part of standard JDK as of 1.8 update 60
+		// following function is provided as part of standard JDK as of 1.8
+		// update 60
 		final String script = "Java.asJSONCompatible(" + source + ")";
 		Map<String, Object> result = null;
 		try {
-			final Object evalResult = se.eval(script);
+			final Object evalResult = javascriptEngine.eval(script);
 			result = (Map<String, Object>) evalResult;
 			if (log.isLoggable(Level.FINE)) {
 				log.fine("Successfully parsed " + source + " into " + result);
@@ -145,8 +146,7 @@ public class SimpleNativeJsonParser implements JsonParser {
 		final StringBuilder sb = new StringBuilder("{");
 		try {
 
-			final List<PropertyDescriptor> validPropertyDescriptors = Arrays
-					.asList(Introspector.getBeanInfo(obj.getClass()).getPropertyDescriptors()).stream()
+			final List<PropertyDescriptor> validPropertyDescriptors = Arrays.asList(Introspector.getBeanInfo(obj.getClass()).getPropertyDescriptors()).stream()
 					// filter out properties with setters only
 					.filter(pd -> Objects.nonNull(pd.getReadMethod()))
 					// filter out getClass method from java.lang.Object

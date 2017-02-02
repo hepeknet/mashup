@@ -27,17 +27,15 @@ public abstract class ConfigurationUtil {
 		LOG.info("Loading configuration...");
 		final Properties props = new Properties();
 		try {
-			final String configuredPropertiesLocation = System
-					.getProperty(Constants.CONFIGURATION_LOCATION_SYS_PROPERTY_NAME);
+			final String configuredPropertiesLocation = System.getProperty(Constants.CONFIGURATION_LOCATION_SYS_PROPERTY_NAME);
 			if (configuredPropertiesLocation != null && !configuredPropertiesLocation.isEmpty()) {
 				LOG.info("Configuration will be loaded from " + configuredPropertiesLocation);
 				try (InputStream is = new FileInputStream(configuredPropertiesLocation)) {
 					props.load(is);
 				}
 			} else {
-				LOG.info(
-						"Configuration will be loaded from classpath - was not able to find overriding system property ["
-								+ Constants.CONFIGURATION_LOCATION_SYS_PROPERTY_NAME + "]");
+				LOG.info("Configuration will be loaded from classpath - was not able to find overriding system property ["
+						+ Constants.CONFIGURATION_LOCATION_SYS_PROPERTY_NAME + "]");
 				props.load(ConfigurationUtil.class.getResourceAsStream("/mashup.properties"));
 			}
 		} catch (final IOException ie) {
@@ -71,13 +69,13 @@ public abstract class ConfigurationUtil {
 	 *            the name for which configuration value is needed. Must not be
 	 *            null or empty.
 	 * @return the value associated with configuration property name. Throws
-	 *         exception in case when value does not exist or is empty string.
+	 *         exception in case when value does not exist or is an empty
+	 *         string.
 	 */
 	public static String getStringRequired(String propName) {
 		final String val = getString(propName);
 		if (val == null || val.trim().isEmpty()) {
-			throw new IllegalStateException("Required configuration property [" + propName
-					+ "] does not have assigned non-empty string value!");
+			throw new IllegalStateException("Required configuration property [" + propName + "] does not have assigned non-empty string value!");
 		}
 		return val;
 	}

@@ -1,8 +1,8 @@
 package com.test.mashup.metrics;
 
 /**
- * A counter is a simple incrementing and decrementing 64-bit integer. This can
- * count, for example, number of cache misses, number of failures etc.
+ * A counter is a simple incrementing and decrementing integer. This can count,
+ * for example, number of cache misses, number of failures etc.
  * 
  * @author borisa
  *

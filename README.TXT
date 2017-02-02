@@ -13,16 +13,19 @@ language provides.
 
 REQUIREMENTS
 
-Oracle JDK 1.8.0_60 at least, the best is to use latest one available - 1.8.0_100 or higher! If you use older version then
-not everything might work because I rely on some latest feature (parts of Javascript scripting engine shipped with JDK) 
-to implement Json parsing without using any 3PPs.
+I developed this software using Oracle JDK jdk1.8.0_121
+It also passed successful tests with Open JDK XYZ 
 
-These are not specific to Oracle JDK, these features are standard JDK features. This software was tested with OpenJDK and it works.
+Requirements is Oracle JDK 1.8.0_60 at least, the best is to use latest one available - 1.8.0_100 or higher! 
+If you use older version then not everything might work because I rely on some latest feature (parts of Javascript 
+scripting engine shipped with JDK) to implement Json parsing without using any 3PPs.
 
-Another option would be for me to write my own JSON parser, deal with ASTs and different corner cases and it would easily
-require few days just to do that.
+These are not specific to Oracle JDK, these features are standard features of any JDK implementation.
 
-Usually I would not depend on latest JVM version but in order to avoid writing my own JSON parser I decided to do so.
+In order to support older versions of Java I would have to write my own JSON parser, deal with ASTs and different corner cases 
+and it would easily require few days just to do that.
+
+Usually I would not depend on latest JDK version but in order to avoid writing my own JSON parser I decided to do so.
 
 I chose to depend on JDK 1.8 because it has functional features similar to Scala.
 Depending on specific version of dependency is not a problem anymore in the world of microservices and containers (Docker)
@@ -32,6 +35,9 @@ and versioned.
 CONFIGURATION
 
 It is MANDATORY to change first two configuration values in file src/main/resources/mashup.properties
+
+twitter_auth_key (Twitter consumer key)
+twitter_auth_secret (Twitter consumer secret)
 
 Other configuration values can also be modified but this is optional.
 
@@ -54,12 +60,12 @@ TESTS
 
 JUnit tests are executed automatically during Maven build. 
 Ideally there should be much more JUnit tests but I was able to achieve only ~60% of coverage.
-Few more hours of work should be done to add extra tests and maybe refactor a thing or two while doing that.
+Few more hours of work should be done to add extra tests and maybe refactor a thing or two while writing tests.
 
-We would have to add integration tests and system tests. Those tests would test network failures, problems with DNS, problems with
+We would also have to add integration tests and system tests. Those tests would test network failures, problems with DNS, problems with
 slow responses from remote dependencies etc. This can be done by mocking dependencies using some kind of embedded Jetty etc.
 
-We would have to add stress tests and reliability tests - but this would make sense only if this was not console only app, like it is today.
+We would have to add stress tests and reliability tests - but this would make sense mostly if this was not console only app, like it is today.
 If this application exposed some RESTful APIs to others then we would have to test its robustness further more, test deployment etc.
 
 POTENTIAL IMPROVEMENTS
