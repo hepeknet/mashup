@@ -28,8 +28,7 @@ public class Main {
 	/*
 	 * Tracking and exposing internal statistics
 	 */
-	private static Histogram appStats = DependenciesFactory.createMetrics()
-			.getHistogram("MashupStatisticsExecutionTimeMs");
+	private static Histogram appStats = DependenciesFactory.createMetrics().getHistogram("MashupStatisticsExecutionTimeMs");
 
 	public static void main(String[] args) throws Exception {
 		final GithubTwitterMashup mashupApp = new GithubTwitterMashup();
@@ -42,10 +41,10 @@ public class Main {
 					LOG.info("Entered keyword is [" + trimmed + "]");
 					searchAndPrintResult(mashupApp, trimmed);
 				} catch (final Exception exc) {
-					// in case there is temporary problem with network we want
-					// to allow user to try search again
-					LOG.log(Level.SEVERE, "Caught exception while performing search. Details: " + exc.getMessage(),
-							exc);
+					// in case there is temporary problem with the network we
+					// want to allow user to try search again - so do not die
+					// until user asks to exit the app
+					LOG.log(Level.SEVERE, "Caught exception while performing search. Details: " + exc.getMessage(), exc);
 				}
 			} else {
 				break;
