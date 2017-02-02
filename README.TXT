@@ -46,9 +46,11 @@ TESTS
 
 JUnit tests are executed automatically during Maven build.
 
-Integration tests can be executed in the following way:
+We would have to add integration tests and system tests. Those tests would test network failures, problems with DNS, problems with
+slow responses from remote dependencies etc.
 
-- TODO
+We would have to add stress tests and reliability tests - but this would make sense only if this was not console only app.
+If it exposed some RESTful APIs to others then we would have to test its robustness further more.
 
 POTENTIAL IMPROVEMENTS
 
@@ -62,9 +64,5 @@ POTENTIAL IMPROVEMENTS
 OTHER THINGS THAT SHOULD BE PART OF PRODUCTION READY SOFTWARE
 
 - Documentation, especially if we are exposing APIs remotely or exposing some client library. This is currently not the case for this project but it could expand.
-	If we are providing user library then API should be clearly separated (separate jar) from implementation.
-
-INTERNAL - TODO: 
-
-- at least one integration test
+	If we are providing user library then API should be clearly separated (separate jar) from implementation jars.
 

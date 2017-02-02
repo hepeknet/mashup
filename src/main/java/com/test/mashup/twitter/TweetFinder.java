@@ -152,7 +152,7 @@ public class TweetFinder {
 	 */
 	private volatile String cachedBearer = null;
 
-	private InputStream tryToGetTweets(String keyword, boolean shouldRetry) throws IOException {
+	InputStream tryToGetTweets(String keyword, boolean shouldRetry) throws IOException {
 		final String searchUrl = baseSearchUrl + URLEncoder.encode(keyword) + "&count=" + maxTweetsPerSearch;
 		log.info("Tweet search url is " + searchUrl);
 		/*
@@ -194,7 +194,7 @@ public class TweetFinder {
 	/*
 	 * As per https://dev.twitter.com/oauth/application-only
 	 */
-	private String getBearer(String urlStr) throws IOException {
+	String getBearer(String urlStr) throws IOException {
 		// if cached then use that, in case when cached does not work anymore it
 		// will be invalidated and then we will ask twitter for new bearer token
 		if (cachedBearer == null) {
