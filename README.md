@@ -1,7 +1,7 @@
 ## INTRO
 
 One of restrictions assumed here was to use JDK only but no other 3PP library for the main code.
-This impacted a lot of the code.
+This impacted a lot of the code (for example we can not use 3PP for parsing JSON so we depend on specific version of JDK).
 
 ## REQUIREMENTS
 
