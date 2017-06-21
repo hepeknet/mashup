@@ -1,18 +1,7 @@
-All questions or problems please send me an email at borisha.zivkovic@gmail.com
-
 ## INTRO
 
-One of restrictions given to me was to use JDK only but no other 3PP library for the main code.
-This impacted a lot of my decisions.
-
-I was given a choice between two programming languages Java and Scala.
-
-I decided to use Java because I am much faster in it and given the fact that I could not use 3PP libraries I had
-to be very fast and productive in order to implement all required features and also to have good code quality.
-
-I did use some of Java 8 features (lambdas, CompletableFutures) - which are functionally very similar to what Scala
-language provides.
-
+One of restrictions assumed here was to use JDK only but no other 3PP library for the main code.
+This impacted a lot of the code.
 
 ## REQUIREMENTS
 
