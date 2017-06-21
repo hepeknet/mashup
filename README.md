@@ -5,8 +5,8 @@ This impacted a lot of the code (for example we can not use 3PP for parsing JSON
 
 ## REQUIREMENTS
 
-I developed this software using Oracle JDK jdk1.8.0_121
-It also passed successful tests with Open JDK 8u111-jdk (as verified in Dockerfile below)
+I developed this software using Oracle JDK jdk1.8.0_121.
+It also passed successful tests with Open JDK 8u111-jdk (as verified in Dockerfile below).
 
 To run this software you need at least Oracle JDK 1.8.0_60, the best is to use latest one available - 1.8.0_100 or higher! 
 If you use older version then not everything might work because I rely on some latest feature (functions parts of Javascript 
@@ -29,6 +29,7 @@ and versioned.
 It is MANDATORY to change first two configuration values in file src/main/resources/mashup.properties
 
 twitter_auth_key (Twitter consumer key)
+
 twitter_auth_secret (Twitter consumer secret)
 
 You have to do this BEFORE building and running software.
